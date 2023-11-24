@@ -20,8 +20,8 @@
 #define SEN_OFF 		0		// low出力　: センサLED消灯
 
 #define SEN_WAIT 		20 		// LEDを点灯消灯するまでの時間
-#define ON_SAMPLING 	20		// LEDがON時のサンプリング数
-#define OFF_SAMPLING	10		// LEDがOFF時のサンプリング数
+#define ON_SAMPLING 	5		// LEDがON時のサンプリング数
+#define OFF_SAMPLING	5		// LEDがOFF時のサンプリング数
 
 #define LED_WALL_FR(x)	HAL_GPIO_WritePin( LED_WALL_FR_GPIO_Port, LED_WALL_FR_Pin, x );
 #define LED_WALL_R(x)	HAL_GPIO_WritePin( LED_WALL_R_GPIO_Port, LED_WALL_R_Pin, x );

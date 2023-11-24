@@ -29,7 +29,7 @@ uint8_t fwall = 0;
 uint8_t lwall = 0;
 uint8_t rwall = 0;
 
-uint8_t GOAL_X = 7;
+uint8_t GOAL_X = 8;
 uint8_t GOAL_Y = 7;
 //===============================================
 // map: Get Wall Data
@@ -477,7 +477,7 @@ void make_course( int goal_x, int goal_y )
 
 }
 //===============================================
-// map: 2時走行斜めcourse作成( スラローム )
+// map: 2時走行斜めcourse作成
 //===============================================
 void make_dia_course( void )
 {

@@ -211,7 +211,7 @@ void mode1( int x )
 	Buzzer_Set_Confirm();
 
 	while( 1 ){
-		int submode = Select_Number( 1, 11 );
+		int submode = Select_Number( 1, 12 );
 		if( submode == -1 ){
 			break;
 		}else{
@@ -347,12 +347,8 @@ void mode1( int x )
 					Ctrl_SideWall.Use = true;
 					Move_Straight_Stop( 90, 100, 10);
 					Move_Stop();
-					Ctrl_SideWall.Use = false;
-					LED_Set_Confirm();
 
-					IMU_Calibrate();
-					LED_Set_Confirm();
-					Ctrl_SideWall.Use = true;
+					Ctrl_SideWall.Use = false;
 					Log_Start();
 					Move_Straight_Stop( 110, 200, 10 );
 					Log_Stop();
@@ -455,6 +451,22 @@ void mode1( int x )
 
 					Enc.Pulse.l = 0; Enc.Pulse.r = 0;
 					break;
+
+				case 12:
+					Param_Load();
+					LED_Start_Wait();
+					IMU_Calibrate();
+					LED_Set_Confirm();
+
+					Move_Straight( Global_Straight.Dist.Start + Global_Straight.Dist.Half, Global_S45.Speed, Global_Straight.Speed.Acc);
+					Ctrl_SideWall.Use = true;
+					Ctrl_FrontWall.Use = false;
+					Move_Straight(Global_S45.In_Offset, Global_S45.Speed, Global_Straight.Speed.Acc);
+					Ctrl_FrontWall.Use = false;
+					Move_Slalom_Turn( &Global_S45, R_TURN );
+					//Move_Slalom_Turn( &Global_S90L );
+					Ctrl_SideWall.Use = false;
+					Move_Straight_Stop(Global_S45.Out_Offset, Global_S45.Speed, Global_Straight.Speed.Acc);
 				default:
 					printf("\r\n----------------ERROR --------------\r\n No Such Mode\r\n");
 					break;
@@ -542,7 +554,7 @@ void mode4( int x )
 	Buzzer_Set_Confirm();
 
 	Param_Load();
-	loadFlash( course_start_address, (uint8_t*)map_course, sizeof(map_course));
+	Select_Map();
 	make_dia_course();
 
 	LED_Start_Wait();

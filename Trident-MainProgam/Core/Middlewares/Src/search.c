@@ -147,14 +147,14 @@ void mouse_try( void )
 		    	map_count += mass-1;
 //		    	Ctrl_SideWall.Use = true;
 //		    	Global_WSen.SideEnd.Use = true;
-//		    	if( (map_course[map_count+1] == 0) && (map_course[map_count+2] == 0) )
+//		    	if( (map_course[map_count+1] == 0) && (map_course[map_count+2] == 0) ){
 //		    		Move_Straight(Global_Straight.Dist.Full, Global_Straight.Speed.Long_Fast, Global_Straight.Speed.Acc);
-//		    	else if( (map_course[map_count+1] == 0) )
+//		    	}else if( (map_course[map_count+1] == 0) ){
 //		    		Move_Straight(Global_Straight.Dist.Full, Global_Straight.Speed.Fast, Global_Straight.Speed.Acc);
-//		    	else
+//		    	}else{
 //		    		Move_Straight(Global_Straight.Dist.Full, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
-
-		    	Global_WSen.SideEnd.Use = false;
+//		    	}
+//		    	Global_WSen.SideEnd.Use = false;
 
 		    	head_change = 0;
 		    	break;
@@ -323,24 +323,24 @@ void mouse_dia_try( void )
 				return;
 				break;
 			case DSTR:
-				if( dia_course[map_count+1] != DSTR){
-					switch( dia_course[map_count+1]){
-					case S45R:
-						decel_speed = Global_S45.Speed; break;
-					case S45L:
-						decel_speed = Global_S45.Speed; break;
-					case S135R:
-						decel_speed = Global_S135.Speed; break;
-					case S135L:
-						decel_speed = Global_S135.Speed; break;
-					case S180R:
-						decel_speed = Global_S180.Speed; break;
-					case S180L:
-						decel_speed = Global_S180.Speed; break;
-					default:
-						decel_speed = Global_Straight.Speed.Normal; break;
-					}
-				}
+//				if( dia_course[map_count+1] != DSTR){
+//					switch( dia_course[map_count+1]){
+//					case S45R:
+//						decel_speed = Global_S45.Speed; break;
+//					case S45L:
+//						decel_speed = Global_S45.Speed; break;
+//					case S135R:
+//						decel_speed = Global_S135.Speed; break;
+//					case S135L:
+//						decel_speed = Global_S135.Speed; break;
+//					case S180R:
+//						decel_speed = Global_S180.Speed; break;
+//					case S180L:
+//						decel_speed = Global_S180.Speed; break;
+//					default:
+//						decel_speed = Global_Straight.Speed.Normal; break;
+//					}
+//				}
 				Move_Straight(127, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
 
 			case S45R:
@@ -464,17 +464,16 @@ void mouse_dia_try( void )
 				Move_Straight(Global_V90.Out_Offset, Global_V90.Speed, Global_Straight.Speed.Acc);
 				break;
 			case HALF_STR:
-				Ctrl_SideWall.Use = true;
-				Global_WSen.SideEnd.Use = false;
-				if( dia_course[map_count+1] == 1){
-					Move_Straight(90, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
-				}else{
-					Move_Straight(90, decel_speed, Global_Straight.Speed.Acc);
-				}
+//				Ctrl_SideWall.Use = true;
+//				Global_WSen.SideEnd.Use = false;
+//				if( dia_course[map_count+1] == STR){
+				Move_Straight(Global_Straight.Dist.Half, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
+//				}else{
+//					Move_Straight(90, decel_speed, Global_Straight.Speed.Acc);
+//				}
 		      // その他
 		      default :
-					head_change = 0;          			// 進行方向更新変数を前に設定
-					head = ( head + head_change ) & 0x03; 		// 詳細は下を参照
+					Move_Stop();
 					return;                   			// ループ終了
 					break;
 	    }

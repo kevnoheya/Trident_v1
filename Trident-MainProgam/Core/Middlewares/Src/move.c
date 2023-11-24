@@ -95,7 +95,7 @@ void Move_Slalom_Turn( PARAM_SLALOM_T *sla, int dir )
 	Machine.V.Target = sla->Speed;
 
 	if( sla->Speed != 0 ) Machine.Angular.Target = sla->Speed / sla->Radius * 180.0 / M_PI;
-	else Machine.Angular.Target = 500.0;
+	else Machine.Angular.Target = 350.0;
 
 	Machine.Alpha.Target = Machine.Angular.Target * Machine.Angular.Target / angle / 500.0;
 	if( angle < 0 ) Machine.Alpha.Target *= -1;
@@ -347,11 +347,16 @@ void Move_Straight_Acc( uint8_t mass, uint16_t v1, uint16_t v2, uint16_t v3, uin
 {
 	uint16_t v;
 
-	if( mass >= 5 ) v = v3;
-	else if( mass > 1 ) v = v2;
+	//if( mass > 5 ) v = v3;
+	if( mass > 6 ) v = v3;// + ((mass-5)*500);
+	else if( mass > 3 ) v = (v2+v3)/2;
+	else if( mass > 2 ) v = v2 ;
+	else if( mass == 2 ) v = v1+500;
 	else v = v1;
 
-	uint32_t deacc_y = ((pow(v, 2) - pow(v1, 2)) / (2.0 * deacc * 1000));
+	if( v > v3 ) v = v3;
+
+	uint32_t deacc_y = ((pow(v, 2) - pow(v1, 2)) / (2.0 * deacc  * 1000));
 
 	if( mass > 1 ){
 		Machine.Angular.Target = 0;
@@ -368,7 +373,7 @@ void Move_Straight_Acc( uint8_t mass, uint16_t v1, uint16_t v2, uint16_t v3, uin
 		Enc.Position.y = 0;
 		Enc.Position.x = 0;
 		Enc.Position.angle = 0;
-		while(Enc.Position.y < ( (Global_Straight.Dist.Full * (mass - 1)) - deacc_y)){
+		while(Enc.Position.y < ( (Global_Straight.Dist.Full * (mass - 1)) - (deacc_y))){
 			if( Machine.State.FailSafe == true )
 				break;
 		}
