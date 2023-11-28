@@ -105,16 +105,28 @@ void Control_Front_Wall( void )
 //===============================================
 void Control_Side_WallEnd( void )
 {
-	if( Global_WSen.SideEnd.Use ){
+	if( Global_WSen.SideEnd.Use == 1 ){
 		if( lwall == 1 && WallSen.Value[L] < Global_WSen.SideEnd.Value.l && Enc.Position.y >= Global_Straight.Dist.Full / 4){
 			Enc.Position.y = Global_WSen.SideEnd.Dist.l;
 			led2_irq_flg = 1;
-			Global_WSen.SideEnd.Use = false;
+			Global_WSen.SideEnd.Use = 0;
 		}
 		if( rwall == 1 && WallSen.Value[R] < Global_WSen.SideEnd.Value.r && Enc.Position.y >= Global_Straight.Dist.Full / 4){
 			Enc.Position.y = Global_WSen.SideEnd.Dist.r;
 			led1_irq_flg = 1;
-			Global_WSen.SideEnd.Use = false;
+			Global_WSen.SideEnd.Use = 0;
+		}
+	}
+	else if( Global_WSen.SideEnd.Use == 2 ){
+		if( lwall == 1 && WallSen.Value[L] < Global_WSen.SideEnd.Value.l){
+			Enc.Position.y = Global_WSen.SideEnd.Dist.l - 90;
+			led2_irq_flg = 1;
+			Global_WSen.SideEnd.Use = 0;
+		}
+		if( rwall == 1 && WallSen.Value[R] < Global_WSen.SideEnd.Value.r){
+			Enc.Position.y = Global_WSen.SideEnd.Dist.r - 90;
+			led1_irq_flg = 1;
+			Global_WSen.SideEnd.Use = 0;
 		}
 	}
 }

@@ -7,7 +7,7 @@
 //===============================================
 // 移動 :　スラローム旋回(ver2)
 //===============================================
-void Move_Sla_Turn( PARAM_SLALOM_T *sla, int dir )
+void Move_Slalom_Turn2( PARAM_SLALOM_T *sla, int dir )
 {
 	int angle;
 	if( dir == L_TURN )	angle = sla->Angle * -1;
@@ -19,7 +19,7 @@ void Move_Sla_Turn( PARAM_SLALOM_T *sla, int dir )
 	bool decel_flg = false;
 	Machine.V.Target = sla->Speed;
 
-	if( sla->Speed != 0 ) Machine.Angular.Target = sla->Speed / sla->Radius * 180 / M_PI;
+	if( sla->Speed != 0 ) Machine.Angular.Target = sla->Speed / sla->Radius * 180.0 / M_PI;
 	else Machine.Angular.Target = 350;
 
 	double decel_deg = angle / 4.0 ;
@@ -43,11 +43,11 @@ void Move_Sla_Turn( PARAM_SLALOM_T *sla, int dir )
 	if( angle > 0 ){
 		Ctrl_Angular.Use = true;
 		while( 1 ){
-			if( angle - decel_deg <= IMU.Angle.z ){
+			if( (angle - decel_deg) <= IMU.Angle.z ){
 				Machine.Angular.Target = 0.0;
 				decel_flg = true;
 			}
-			if( (IMU.Gyro.z <= 0.0 || IMU.Angle.z >= angle)  && decel_flg == true )
+			if( (IMU.Gyro.z <= 0.0 /*|| IMU.Angle.z >= angle*/)  && decel_flg == true )
 				break;
 
 			if( Machine.State.FailSafe == true )
@@ -57,7 +57,7 @@ void Move_Sla_Turn( PARAM_SLALOM_T *sla, int dir )
 		Ctrl_Angular.Use = true;
 		Machine.Angular.Target *= -1;
 		while( 1 ){
-			if( angle + decel_deg >= IMU.Angle.z ){
+			if( angle - decel_deg >= IMU.Angle.z ){
 				Machine.Angular.Target = 0.0;
 				decel_flg = true;
 			}
@@ -65,7 +65,7 @@ void Move_Sla_Turn( PARAM_SLALOM_T *sla, int dir )
 				break;
 
 			if( Machine.State.FailSafe == true )
-					break;
+				break;
 		}
 	}
 
@@ -346,95 +346,110 @@ void Move_Straight2Half( int32_t y, int32_t v, uint16_t a )
 void Move_Straight_Acc( uint8_t mass, uint16_t v1, uint16_t v2, uint16_t v3, uint16_t acc, uint16_t deacc )
 {
 	uint16_t v;
-
-	//if( mass > 5 ) v = v3;
-	if( mass > 6 ) v = v3;// + ((mass-5)*500);
-	else if( mass > 3 ) v = (v2+v3)/2;
-	else if( mass > 2 ) v = v2 ;
-	else if( mass == 2 ) v = v1+500;
-	else v = v1;
-
-	if( v > v3 ) v = v3;
-
-	uint32_t deacc_y = ((pow(v, 2) - pow(v1, 2)) / (2.0 * deacc  * 1000));
-
-	if( mass > 1 ){
-		Machine.Angular.Target = 0;
-		Machine.V.Target = v;
-		Machine.Acc.Target = acc;
-		Machine.Deacc.Target = deacc;
-
-		Ctrl_Speed.Use = false;
-		Ctrl_Speed_L.Use = true;
-		Ctrl_Speed_R.Use = true;
-		Ctrl_SideWall.Use = true;
-		Global_WSen.SideEnd.Use = false;
-
-		Enc.Position.y = 0;
-		Enc.Position.x = 0;
-		Enc.Position.angle = 0;
-		while(Enc.Position.y < ( (Global_Straight.Dist.Full * (mass - 1)) - (deacc_y))){
-			if( Machine.State.FailSafe == true )
-				break;
-		}
-		Global_WSen.SideEnd.Use = false;
-		Machine.V.Target = v1;
-		while(Enc.Position.y < ( Global_Straight.Dist.Full * (mass - 1) ) ){
-			if( Machine.State.FailSafe == true )
-				break;
-		}
-	}
-
-	read_wall_data();
-	Enc.Position.y = 0;
-	Global_WSen.SideEnd.Use = true;
-	Machine.V.Target = v1;
-	while(Enc.Position.y < ( Global_Straight.Dist.Full  ) ){
-		if( Machine.State.FailSafe == true )
-			break;
-	}
-//	Enc.Position.y = 0;
-//	Enc.Position.x = 0;
-//	Enc.Position.angle = 0;
+	uint8_t deacc_mass;
+	uint8_t add_y = 0;
+//	uint32_t acc_v3_y = ((pow(v3, 2) - pow(v1, 2)) / (2.0 * acc * 1000));
+//	uint32_t acc_v2_y = ((pow(v2, 2) - pow(v1, 2)) / (2.0 * acc * 1000));
+	uint32_t deacc_v3_y = ((pow(v3, 2) - pow(v1, 2)) / (2.0 * deacc  * 1000));
+	uint32_t deacc_v2_y = ((pow(v2, 2) - pow(v1, 2)) / (2.0 * deacc  * 1000));
 //
-//	// 目標値を代入
-//	Machine.Angular.Target = 0;							// 角速度の代入
-//	Machine.Angle.Target = 0;							// 角度の代入
-//	Machine.V.Target = v;								// 速度の代入
-//	Machine.Acc.Target = a;								// 加速度の代入
-//	Machine.Deacc.Target = a;							// 減速度の代入
-//
-//	int32_t deacc_y = (( v * v )) / ( 2 * a * 1000 );	// 減速距離を計算
-//
-//	Ctrl_Speed.Use = false;								// 速度FBを有効化
-//	Ctrl_Speed_L.Use = true;
-//	Ctrl_Speed_R.Use = true;
-//
-//	Machine.Control = true;								// 制御開始
-//
-//	if( y > 0 ){										// 前進の時
-//		while( Enc.Position.y < ( y - deacc_y ) ){
-//			if( Machine.State.FailSafe == true )
-//				break;
-//		}		//　加速・定速の距離まで移動
-//		Machine.V.Target = 50;							// 速度を50mmpsにする(すぐに停止できる速度)
-//		while( Enc.Position.y < y ){					//　減速の距離まで
-//			if( Machine.State.FailSafe == true )
-//				break;
-//		}
-//
-//	}else if( y < 0 ){									// 後進の時
-//		while( Enc.Position.y > ( y + deacc_y ) ){		//　減速の距離まで
-//			if( Machine.State.FailSafe == true )
-//				break;
-//		}		// 加速・定速の距離まで移動
-//		Machine.V.Target = -50;							// 速度を50mmpsにする(すぐに停止できる速度)
-//		while( Enc.Position.y < y ){
-//			if( Machine.State.FailSafe == true )		//　減速の距離まで
-//				break;
-//		}
-//
+//	if( (acc_v3_y + deacc_v3_y )/180 < mass ){
+//		v = v3;
+//		deacc_mass = ceil((deacc_v3_y/180)) + 1;
+//	}else if( mass >= 6){
+//		v = v3;
+//		deacc_mass = ceil((deacc_v3_y/180)) + 1;
+//	}else if( (acc_v2_y + deacc_v2_y)/180 < mass){
+//		v = v2;
+//		deacc_mass = ceil((deacc_v2_y/180)) + 1  ;
+//	}else{
+//		v = v1;
+//		deacc_mass = 0 ;
 //	}
+
+	if( mass >= 8 ){
+		v = v3;
+		deacc_mass = ceil((deacc_v3_y/180)) + 1;
+	}else if(mass > 2){
+		v = v2;
+		deacc_mass = ceil((deacc_v2_y/180)) + 1  ;
+	}else{
+		v = v1;
+		deacc_mass = 0;
+	}
+	Ctrl_SideWall.Use = true;
+	if( deacc_mass == 0 ){
+		for( int i = 0; i < mass; i++ ){
+			read_wall_data();
+			Global_WSen.SideEnd.Use = true;
+			Move_Straight( Global_Straight.Dist.Full, v, acc );
+		}
+	}else{
+		for( int i = 0; i < (mass-deacc_mass); i++){
+//			if( v >= 3800 ){
+//				add_y = 1;
+//			}
+			Global_WSen.SideEnd.Use = false;
+			Move_Straight( Global_Straight.Dist.Full + add_y, v, acc);
+		}
+		for( int i = 0; i < deacc_mass; i++ ){
+			if( deacc_mass == i - 1){
+			read_wall_data();
+			Global_WSen.SideEnd.Use = true;
+			}
+			Move_Straight( Global_Straight.Dist.Full, v1, deacc );
+		}
+	}
+
+//	uint16_t v;
+//
+//	//if( mass > 5 ) v = v3;
+//	if( mass > 6 ) v = v3;// + ((mass-5)*500);
+//	else if( mass > 3 ) v = (v2+v3)/2;
+//	else if( mass > 2 ) v = v2 ;
+//	else if( mass == 2 ) v = v1+500;
+//	else v = v1;
+//
+//	if( v > v3 ) v = v3;
+//
+//	uint32_t deacc_y = ((pow(v, 2) - pow(v1, 2)) / (2.0 * deacc  * 1000));
+//
+//	if( mass > 1 ){
+//		Machine.Angular.Target = 0;
+//		Machine.V.Target = v;
+//		Machine.Acc.Target = acc;
+//		Machine.Deacc.Target = deacc;
+//
+//		Ctrl_Speed.Use = false;
+//		Ctrl_Speed_L.Use = true;
+//		Ctrl_Speed_R.Use = true;
+//		Ctrl_SideWall.Use = true;
+//		Global_WSen.SideEnd.Use = false;
+//
+//		Enc.Position.y = 0;
+//		Enc.Position.x = 0;
+//		Enc.Position.angle = 0;
+//		while(Enc.Position.y < ( (Global_Straight.Dist.Full * (mass - 1)) - (deacc_y))){
+//			if( Machine.State.FailSafe == true )
+//				break;
+//		}
+//		Global_WSen.SideEnd.Use = false;
+//		Machine.V.Target = v1;
+//		while(Enc.Position.y < ( Global_Straight.Dist.Full * (mass - 1) ) ){
+//			if( Machine.State.FailSafe == true )
+//				break;
+//		}
+//	}
+//
+//	read_wall_data();
+//	Enc.Position.y = 0;
+//	Global_WSen.SideEnd.Use = true;
+//	Machine.V.Target = v1;
+//	while(Enc.Position.y < ( Global_Straight.Dist.Full  ) ){
+//		if( Machine.State.FailSafe == true )
+//			break;
+//	}
+
 }
 //===============================================
 // 移動 : 停止モジュール
@@ -451,6 +466,11 @@ void Move_Stop( void )
 	}
 
 	Ctrl_Speed.Use = CONTROL_DISABLE;		// 速度FBを無効か
+	Ctrl_Speed_L.Use = CONTROL_DISABLE;
+	Ctrl_Speed_R.Use = CONTROL_DISABLE;
 	Machine.Control = CONTROL_DISABLE;		// 制御停止
+	Ctrl_SideWall.Use = CONTROL_DISABLE;
+	Ctrl_Angular.Use = CONTROL_DISABLE;
+	Ctrl_FrontWall.Use = CONTROL_DISABLE;
 	HAL_Delay(10);							// 10ms待つ
 }

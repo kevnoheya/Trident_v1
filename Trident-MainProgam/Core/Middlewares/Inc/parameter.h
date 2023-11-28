@@ -32,6 +32,7 @@ extern PARAM_SLALOM_T 		Global_S135;
 extern PARAM_SLALOM_T 		Global_RE_S135;
 extern PARAM_SLALOM_T 		Global_S180;
 extern PARAM_SLALOM_T 		Global_V90;
+extern PARAM_SLALOM_T 		Global_W90;
 //************************************************
 // 関数プロトタイプ宣言
 //************************************************

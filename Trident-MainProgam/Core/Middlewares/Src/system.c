@@ -395,7 +395,7 @@ void mode1( int x )
 					Move_Straight(Global_S90.In_Offset, Global_S90.Speed, Global_Straight.Speed.Acc );
 
 					Log_Start();
-					Move_Slalom_Turn( &Global_S90, R_TURN );
+					Move_Slalom_Turn2( &Global_S90, R_TURN );
 					Log_Stop();
 
 					Move_Straight_Stop(Global_S90.Out_Offset, Global_S90.Speed, Global_Straight.Speed.Acc );
@@ -421,7 +421,7 @@ void mode1( int x )
 					Move_Slalom_Turn( &Global_T90, R_TURN ); Move_Stop();
 					Move_Straight_Stop(Global_Straight.Dist.Back, Global_Straight.Speed.Low * -1, Global_Straight.Speed.Acc);
 					Move_Straight_Stop(Global_Straight.Dist.WalltoMiddle, Global_Straight.Speed.Low, Global_Straight.Speed.Acc);
-					Move_Slalom_Turn( &Global_T90, R_TURN ); Move_Stop();
+					Move_Slalom_Turn( &Global_T90, L_TURN ); Move_Stop();
 
 					Ctrl_SideWall.Use = false;
 					Move_Straight_Stop( 90, 100, 10);
@@ -458,15 +458,37 @@ void mode1( int x )
 					IMU_Calibrate();
 					LED_Set_Confirm();
 
-					Move_Straight( Global_Straight.Dist.Start + Global_Straight.Dist.Half, Global_S45.Speed, Global_Straight.Speed.Acc);
-					Ctrl_SideWall.Use = true;
-					Ctrl_FrontWall.Use = false;
-					Move_Straight(Global_S45.In_Offset, Global_S45.Speed, Global_Straight.Speed.Acc);
-					Ctrl_FrontWall.Use = false;
-					Move_Slalom_Turn( &Global_S45, R_TURN );
-					//Move_Slalom_Turn( &Global_S90L );
-					Ctrl_SideWall.Use = false;
-					Move_Straight_Stop(Global_S45.Out_Offset, Global_S45.Speed, Global_Straight.Speed.Acc);
+					wideturn_course[0] = STR;
+					wideturn_course[1] = STR;
+					wideturn_course[2] = STR;
+					wideturn_course[3] = HALF_STR;
+					wideturn_course[4] = S180R;
+					wideturn_course[5] = HALF_STR;
+					wideturn_course[6] = GOAL;
+
+					mouse_wideturn_try();
+
+
+
+//					dia_course[0] = HALF_STR;
+//					dia_course[1] = S45R;
+//					dia_course[2] = S45L_RE;
+//					dia_course[3] = S135R;
+//					dia_course[4] = DSTR;
+//					dia_course[5] = V90R;
+//					dia_course[6] = DSTR;
+//					dia_course[7] = S135R_RE;
+//					dia_course[8] = HALF_STR;
+//					dia_course[9] = HALF_STR;
+//					dia_course[10] = S180R;
+//					dia_course[11] = GOAL;
+//
+//					mouse_dia_try();
+					MOT_Set_Dir( FREE, FREE );								// モータをフリー状態にする
+					LED_Switch_Wait();
+					Log_Print();
+
+					break;
 				default:
 					printf("\r\n----------------ERROR --------------\r\n No Such Mode\r\n");
 					break;
@@ -555,15 +577,20 @@ void mode4( int x )
 
 	Param_Load();
 	Select_Map();
-	make_dia_course();
+	make_wideturn_course();
 
+	for( int i = 0; i < 256; i++ ){
+		if(wideturn_course[i] == GOAL)
+			break;
+		printf("%d, ", wideturn_course[i]);
+	}
 	LED_Start_Wait();
 	IMU_Calibrate();
 
 	LED_Set_Confirm();
 
 	Machine.State.FailSafe = false;
-	mouse_dia_try();
+	mouse_wideturn_try();
 	LED_Cleaning_Wait();
 }
 
@@ -583,6 +610,18 @@ void mode5( int x )
 	LED_Set_Confirm();
 	Buzzer_Set_Confirm();
 
+	Param_Load();
+	Select_Map();
+	make_dia_course();
+
+	LED_Start_Wait();
+	IMU_Calibrate();
+
+	LED_Set_Confirm();
+
+	Machine.State.FailSafe = false;
+	mouse_dia_try();
+	LED_Cleaning_Wait();
 }
 
 //===============================================

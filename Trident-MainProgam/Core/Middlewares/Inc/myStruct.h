@@ -154,7 +154,7 @@ typedef struct _MACHINE_T{
 		float Target;
 	}Deacc;
 	struct angular_type{		// ‹@‘Ì‚ÌŠp‘¬“x
-		float Target;
+		double Target;
 		float Current;
 	}Angular;
 	struct alpha_type{			// ‹@‘Ì‚ÌŠp‰Á‘¬“x
@@ -227,7 +227,7 @@ typedef struct _PARAM_WSEN_T{
 		uint16_t r;
 	}Ctrl_Lim;
 	struct wallend_t{
-		bool Use;
+		uint8_t Use;
 		struct wallend_dist_t{
 			uint16_t l;
 			uint16_t r;

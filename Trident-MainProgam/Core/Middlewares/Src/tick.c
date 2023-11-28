@@ -156,20 +156,20 @@ void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef *htim )
 			if( SW_Read_L() == SW_ON ){
 				Machine.State.FailSafe = true;
 			}
-			// 角速度の誤差が一定時間で大きい時
-			else if( Machine.State.Turning == true ){
-				if( fabs(IMU.Gyro.z - Machine.Angular.Current) >= 500.0){
-					FS_Turn_ct++;
-				}
-				if( FS_Turn_ct >= 2000 ){
-					Machine.State.FailSafe = true;
-					FS_Turn_ct = 0;
-				}
-			}
-			// センサ値
-			else if( (WallSen.Value[R] >= 740 && WallSen.Value[FR] >= 1600) || (WallSen.Value[L] >= 1040 && WallSen.Value[FL] >= 3250) ){
-				Machine.State.FailSafe = true;
-			}
+//			// 角速度の誤差が一定時間で大きい時
+//			else if( Machine.State.Turning == true ){
+//				if( fabs(IMU.Gyro.z - Machine.Angular.Current) >= 500.0){
+//					FS_Turn_ct++;
+//				}
+//				if( FS_Turn_ct >= 2000 ){
+//					Machine.State.FailSafe = true;
+//					FS_Turn_ct = 0;
+//				}
+//			}
+//			// センサ値
+//			else if( (WallSen.Value[R] >= 740 && WallSen.Value[FR] >= 1600) || (WallSen.Value[L] >= 1040 && WallSen.Value[FL] >= 3250) ){
+//				Machine.State.FailSafe = true;
+//			}
 
 		}else{
 			Machine.State.FailSafe = false;

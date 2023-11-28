@@ -21,7 +21,7 @@
 //************************************************
 // 関数プロトタイプ宣言
 //************************************************
-void Move_Sla_Turn( PARAM_SLALOM_T *sla, int dir );
+void Move_Slalom_Turn2( PARAM_SLALOM_T *sla, int dir );
 void Move_Slalom_Turn( PARAM_SLALOM_T *sla, int dir );
 void Move_Recovery( void );
 void Move_Straight( int16_t y, int16_t v, uint16_t a );

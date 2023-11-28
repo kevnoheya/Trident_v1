@@ -39,6 +39,8 @@
 #define S45RL		18
 #define S45LR		19
 #define HALF_STR 	20
+#define W90R		21
+#define W90L		22
 //************************************************
 // グローバル変数宣言
 //************************************************
@@ -50,6 +52,7 @@ extern unsigned char pos_y;
 extern unsigned char map[16][16];
 extern unsigned char p_map[16][16];
 extern volatile uint8_t map_course[256];
+extern volatile uint8_t wideturn_course[256];
 extern volatile uint8_t dia_course[256];
 
 extern volatile uint8_t map_id;
@@ -75,6 +78,7 @@ void make_potential( int gx, int gy, int mode );
 int search_adachi( void );
 void make_try_map( void );
 void make_course( int goal_x, int goal_y );
+void make_wideturn_course( void );
 void make_dia_course( void );
 void map_copy_to( int id );
 void map_load_from( int id );

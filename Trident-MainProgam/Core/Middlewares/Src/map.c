@@ -22,6 +22,7 @@ unsigned char backup_map[5][16][16];
 unsigned char backup_p_map[5][16][16];
 
 volatile uint8_t map_course[256];
+volatile uint8_t wideturn_course[256];
 volatile uint8_t dia_course[256];
 volatile uint8_t course[256];
 
@@ -29,7 +30,7 @@ uint8_t fwall = 0;
 uint8_t lwall = 0;
 uint8_t rwall = 0;
 
-uint8_t GOAL_X = 8;
+uint8_t GOAL_X = 7;
 uint8_t GOAL_Y = 7;
 //===============================================
 // map: Get Wall Data
@@ -475,6 +476,74 @@ void make_course( int goal_x, int goal_y )
 	}
 
 
+}
+//===============================================
+// map: 2時走行大回りcourse作成
+//===============================================
+void make_wideturn_course( void )
+{
+	// マップのコピー
+	for( int i = 0; i < 256; i++ )
+	{
+		if(map_course[i] == 0) course[i] = STR;
+		else if( map_course[i] == 1) course[i] = S90R;
+		else if( map_course[i] == 2) course[i] = REVERSE;
+		else if( map_course[i] == 3) course[i] = S90L;
+		else if( map_course[i] == 4){
+			course[i] = GOAL;
+			//course[i+1] = GOAL;
+			break;
+		}
+	}
+
+	uint8_t i = 0; 	// course(スラロームコーズ)のカウンタ
+	uint8_t t = 0;	// dia_course(斜めコース)のカウンタ
+
+	while( i < 256 ){
+		//S180L
+		if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == S90L && course[i+3] == STR) ){
+			wideturn_course[t] = HALF_STR; t++;
+			wideturn_course[t] = S180L; t++;
+			wideturn_course[t] = HALF_STR;
+			i+=4;
+		}
+		//S180R
+		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == S90R && course[i+3] == STR) ){
+			wideturn_course[t] = HALF_STR; t++;
+			wideturn_course[t] = S180R; t++;
+			wideturn_course[t] = HALF_STR;
+			i+=4;
+		}
+
+		//W90L
+		else if((course[i] == STR && course[i+1] == S90L) && (course[i+2] == STR) ){
+			wideturn_course[t] = HALF_STR; t++;
+			wideturn_course[t] = W90L; t++;
+			wideturn_course[t] = HALF_STR;
+			i+=3;
+		}
+		//W90R
+		else if((course[i] == STR && course[i+1] == S90R) && (course[i+2] == STR) ){
+			wideturn_course[t] = HALF_STR; t++;
+			wideturn_course[t] = W90R; t++;
+			wideturn_course[t] = HALF_STR;
+			i+=3;
+		}
+
+		// GOAL
+		else if( course[i] == GOAL ){
+			wideturn_course[t] = GOAL;
+			break;
+		}
+		else{
+
+			//}else{
+				wideturn_course[t] = course[i];
+				i += 1;
+			//}
+		}
+		t++;
+	}
 }
 //===============================================
 // map: 2時走行斜めcourse作成

@@ -23,5 +23,6 @@
 //************************************************
 void mouse_search( int goal_x, int goal_y, int return_flg );
 void mouse_try( void );
+void mouse_wideturn_try( void );
 void mouse_dia_try( void );
 #endif /* MIDDLEWARES_SEARCH_H_ */
