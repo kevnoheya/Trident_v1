@@ -28,6 +28,10 @@ extern CTRL_T 			Ctrl_Angular;
 
 extern CTRL_T 			Ctrl_SideWall;
 extern CTRL_T 			Ctrl_FrontWall;
+
+extern volatile double WallDist_FL;
+extern volatile double WallDist_FR;
+
 //************************************************
 // 関数プロトタイプ宣言
 //************************************************

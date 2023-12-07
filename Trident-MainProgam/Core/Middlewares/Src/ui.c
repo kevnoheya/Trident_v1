@@ -163,7 +163,7 @@ void LED_Start_Wait( void )
 		else if( x < 20000 ) LED_Set_All_Off();	// LEDがOFF時
 		else if( x > 30000 ) x = 0;		// タイマーのリセット
 		// スタート信号の判断
-		if( SW_Read_R() == SW_ON || (( WallSen.Value[FR] > 600 ) && ( WallSen.Value[FL] > 600 )) ){
+		if( SW_Read_R() == SW_ON || (( WallSen.Value[FR] > 300 ) && ( WallSen.Value[FL] > 300 )) ){
 			HAL_Delay( SW_WAIT );						// チャタリング防止
 			//LED_Set_Confirm();						// 決定時LEDの演出
 			LED_Set_All_Off();

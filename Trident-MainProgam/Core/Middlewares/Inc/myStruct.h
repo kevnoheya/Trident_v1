@@ -58,6 +58,7 @@ typedef struct _IMU_T{
 			int32_t y;
 			int32_t z;
 		}Offset;
+		double Speed;
 	}Acc;
 
 	// äeë¨ìxèÓïÒ
@@ -187,6 +188,7 @@ typedef struct _LOG_T{
 	volatile float MotV_L[1024];
 	volatile float MotV_R[1024];
 	volatile float MotV_LR[1024];
+	volatile float IMU_V[1024];
 	volatile float MachineAngular[1024];
 	volatile float MotAngular[1024];
 	volatile float IMUAngular[1024];

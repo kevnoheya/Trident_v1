@@ -281,7 +281,7 @@ void mode1( int x )
 
 					Log_Start();
 					Ctrl_SideWall.Use = true;
-					Move_Straight_Stop( Global_Straight.Dist.Full*15, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc );
+					Move_Straight_Stop( Global_Straight.Dist.Full, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc );
 					Log_Stop();
 					MOT_Set_Dir( FREE, FREE );								// モータをフリー状態にする
 					LED_Switch_Wait();
@@ -344,13 +344,13 @@ void mode1( int x )
 					Move_Straight_Stop(Global_Straight.Dist.WalltoMiddle, Global_Straight.Speed.Low, Global_Straight.Speed.Acc);
 					Move_Slalom_Turn( &Global_T90, L_TURN ); Move_Stop();
 
-					Ctrl_SideWall.Use = true;
-					Move_Straight_Stop( 90, 100, 10);
-					Move_Stop();
+					Ctrl_SideWall.Use = false;
+					Move_Straight_Stop( 90, 120, 10);
+					HAL_Delay( 500 );
 
 					Ctrl_SideWall.Use = false;
 					Log_Start();
-					Move_Straight_Stop( 110, 200, 10 );
+					Move_Straight_Stop( 110, 120, 10 );
 					Log_Stop();
 
 					MOT_Set_Dir( FREE, FREE );								// モータをフリー状態にする
@@ -458,15 +458,14 @@ void mode1( int x )
 					IMU_Calibrate();
 					LED_Set_Confirm();
 
-					wideturn_course[0] = STR;
-					wideturn_course[1] = STR;
-					wideturn_course[2] = STR;
-					wideturn_course[3] = HALF_STR;
-					wideturn_course[4] = S180R;
-					wideturn_course[5] = HALF_STR;
-					wideturn_course[6] = GOAL;
+					dia_course[0] = HALF_STR;
+					dia_course[1] = S45R;
+					dia_course[2] = GOAL;
+					dia_course[3] = S180R;
+					dia_course[4] = HALF_STR;
+					dia_course[5] = GOAL;
 
-					mouse_wideturn_try();
+					mouse_dia_try();
 
 
 

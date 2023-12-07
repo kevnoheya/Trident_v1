@@ -23,6 +23,7 @@
 //************************************************
 void Move_Slalom_Turn2( PARAM_SLALOM_T *sla, int dir );
 void Move_Slalom_Turn( PARAM_SLALOM_T *sla, int dir );
+void Move_Sla_In( int16_t y, int16_t v, uint16_t a );
 void Move_Recovery( void );
 void Move_Straight( int16_t y, int16_t v, uint16_t a );
 void Move_Straight_Stop( int32_t y, int32_t v, uint16_t a );

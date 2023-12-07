@@ -120,6 +120,8 @@ void IMU_Read( void )
 	IMU.Acc.x = ( IMU.Acc.Raw.x - IMU.Acc.Offset.x ) / IMU.Acc.ScaleFactor;
 	IMU.Acc.y = ( IMU.Acc.Raw.y - IMU.Acc.Offset.y ) / IMU.Acc.ScaleFactor;
 	IMU.Acc.z = ( IMU.Acc.Raw.z - IMU.Acc.Offset.z ) / IMU.Acc.ScaleFactor;
+
+	IMU.Acc.Speed += (IMU.Acc.x * -98);
 	// ê∂ílÇ©ÇÁ[deg/s]Ç…ïœä∑ÇµÇƒéÊìæ
 	IMU.Gyro.x = ( IMU.Gyro.Raw.x - IMU.Gyro.Offset.x ) / IMU.Gyro.ScaleFactor;
 	IMU.Gyro.y = ( IMU.Gyro.Raw.y - IMU.Gyro.Offset.y ) / IMU.Gyro.ScaleFactor;
@@ -180,6 +182,7 @@ void IMU_Calibrate( void )
 	IMU.Angle.y = 0;
 	IMU.Angle.z = 0;
 	IMU.global_angle_z = 0;
+	IMU.Acc.Speed = 0;
 }
 
 //===============================================

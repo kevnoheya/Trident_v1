@@ -38,6 +38,8 @@
         * Output
         * EVENT_OUT
         * EXTI
+        * Free pins are configured automatically as Analog (this feature is enabled through
+        * the Code Generation settings)
 */
 void MX_GPIO_Init(void)
 {
@@ -73,12 +75,32 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(SW_L_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PC14 PC15 PC4 PC5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_4|GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PA1 PA3 PA8 PA11
+                           PA12 PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_3|GPIO_PIN_8|GPIO_PIN_11
+                          |GPIO_PIN_12|GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = GYRO_NCS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GYRO_NCS_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB0 PB2 PB10 PB11 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_2|GPIO_PIN_10|GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin
                            PBPin */

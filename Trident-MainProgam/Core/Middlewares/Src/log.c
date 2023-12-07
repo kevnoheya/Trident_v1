@@ -33,6 +33,7 @@ void Log_Get_Data( void )
 		Log.MotV_L[Log.Ct] = Enc.Speed.l;
 		Log.MotV_R[Log.Ct] = Enc.Speed.r;
 		Log.MotV_LR[Log.Ct] = Enc.Speed.lr;
+		Log.IMU_V[Log.Ct]  = IMU.Acc.Speed;
 
 		Log.MachineAngular[Log.Ct]= Machine.Angular.Current;
 		Log.MotAngular[Log.Ct] = Enc.Speed.angular;
@@ -66,7 +67,7 @@ void Log_Stop( void )
 //===============================================
 void Log_Print( void )
 {
-	printf("Time[ms], WallSen FL, WallSen L, WallSen R, WallSen FR, Machine V, Mot V L, Mot V R, Mot V LR, Machine Angular, Mot Angular, IMU Angular Z, Machine Angle, Mot Angle, IMU Angle, Mot Distance X, Mot Distance Y, IMU Global Angle\r\n");
+	printf("Time[ms], WallSen FL, WallSen L, WallSen R, WallSen FR, Machine V, Mot V L, Mot V R, Mot V LR, Machine Angular, Mot Angular, IMU Angular Z, Machine Angle, Mot Angle, IMU Angle, Mot Distance X, Mot Distance Y, IMU Global Angle, IMU V\r\n");
 
 	for( int i = 0; i < Log.Ct; i++ ){
 		printf( "%d ,", i );
@@ -86,7 +87,8 @@ void Log_Print( void )
 		printf( "%f ,", Log.IMUAngle[i] );
 		printf( "%f ,", Log.MotX[i] );
 		printf( "%f ,", Log.MotY[i] );
-		printf( "%f\r\n", Log.IMUGlobalAngle[i]);
+		printf( "%f ,", Log.IMUGlobalAngle[i]);
+		printf( "%f\r\n", Log.IMU_V[i]);
 		//HAL_Delay( 1 );
 	}
 }

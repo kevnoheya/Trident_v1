@@ -56,7 +56,7 @@ void Control_Side_Wall( void )
 	if( Ctrl_SideWall.Use ){
 		double target_angle = 0;
 		double Err_Angle_L = ((-6.0 * pow(10, -9) * pow(WallSen.Value[L], 3)) + (4.0 * pow(10, -5) * pow(WallSen.Value[L], 2)) + (-0.0812 * WallSen.Value[L]) + 32.05) * -1.0;
-		double Err_Angle_R = ( (1.0*pow(10, -7)*pow(WallSen.Value[R], 3)) + (-0.0002*pow(WallSen.Value[R], 2)) + (0.2088*WallSen.Value[R]) + (-36.975) ) * -1.0;
+		double Err_Angle_R = ( (-1.0*pow(10, -8)*pow(WallSen.Value[R], 3)) + (-0.0001*pow(WallSen.Value[R], 2)) + (0.2057*WallSen.Value[R]) + (-36.771) ) * -1.0;
 
 		if(WallSen.Value[L] > Global_WSen.Ctrl_Lim.l && WallSen.Value[R] > Global_WSen.Ctrl_Lim.r ){
 			if( fabs(Err_Angle_L) > fabs(Err_Angle_R) ) target_angle = Err_Angle_L;
@@ -84,8 +84,8 @@ void Control_Side_Wall( void )
 //===============================================
 void Control_Front_Wall( void )
 {
-	WallDist_FL = ((9.0*pow(10, -9)*pow(WallSen.Value[FL], 3)) + (-6.0*pow(10, -5)*pow(WallSen.Value[FL], 2)) + (0.1623*WallSen.Value[FL]) + (-61.216));
-	WallDist_FR = ((1.0*pow(10, -7)*pow(WallSen.Value[FR], 3)) + (-0.0003*pow(WallSen.Value[FR], 2)) + (0.4149*WallSen.Value[FR]) + (-101.95));
+	WallDist_FL = ((1.0*pow(10, -8)*pow(WallSen.Value[FL], 3)) + (-7.0*pow(10, -5)*pow(WallSen.Value[FL], 2)) + (0.1757*WallSen.Value[FL]) + (-62.513));
+	WallDist_FR = ((6.0*pow(10, -8)*pow(WallSen.Value[FR], 3)) + (-0.0002*pow(WallSen.Value[FR], 2)) + (0.3195*WallSen.Value[FR]) + (-89.024));
 	if( Ctrl_FrontWall.Use ){
 		double Err_FWall;
 
@@ -141,11 +141,12 @@ void Control_Front_WallDist( void )
 			Enc.Position.y = Global_S90.In_Offset;
 			led1_irq_flg = 1; led2_irq_flg = 1; led3_irq_flg = 1; led4_irq_flg = 1;
 			Ctrl_FrontWall.Use = false;
-		}else if( fwall == 1 && (WallSen.Value[FL] >Global_WSen.FrontEnd.Value.l ||WallSen.Value[FR] >Global_WSen.FrontEnd.Value.r)){
-			Enc.Position.y = Global_S90.In_Offset;
-			led1_irq_flg = 1; led2_irq_flg = 1; led3_irq_flg = 1; led4_irq_flg = 1;
-			Ctrl_FrontWall.Use = false;
 		}
+//		else if( fwall == 1 && (WallSen.Value[FL] >Global_WSen.FrontEnd.Value.l ||WallSen.Value[FR] >Global_WSen.FrontEnd.Value.r)){
+//			Enc.Position.y = Global_S90.In_Offset;
+//			led1_irq_flg = 1; led2_irq_flg = 1; led3_irq_flg = 1; led4_irq_flg = 1;
+//			Ctrl_FrontWall.Use = false;
+//		}
 	}
 }
 
