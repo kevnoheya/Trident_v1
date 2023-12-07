@@ -392,11 +392,10 @@ void Move_Straight_Acc( uint8_t mass, uint16_t v1, uint16_t v2, uint16_t v3, uin
 		deacc_mass = 0;
 	}else{
 		y = mass* Global_Straight.Dist.Full;
-		v = sqrt((2 * acc * y/3 * 1000) - pow(v1, 2));
+		v = sqrt((2 * acc * y/3 * 1000) + pow(v1, 2));
 		if( v > v3 ) v = v3;
-		if( v < v1 ) v = v1;
 		deacc_mass = ceil(((pow(v, 2) - pow(v1, 2)) / (2.0 * acc  * 1000))/180.0);
-		//if( v > 3000 ) deacc_mass ++;
+		if( v > 3000 ) deacc_mass ++;
 	}
 
 	Ctrl_SideWall.Use = true;

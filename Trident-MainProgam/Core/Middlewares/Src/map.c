@@ -587,6 +587,24 @@ void make_dia_course( void )
 			dia_state = 0;
 			RE_flg = 1;
 		}
+		// ----------------------------
+		// W90L
+		else if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+			t--; dia_course[t] = W90L; t++;
+			dia_course[t] = HALF_STR;
+			i+=2;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// W90R
+		else if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+			t--; dia_course[t] = W90R; t++;
+			dia_course[t] = HALF_STR;
+			i+=2;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// ----------------------------
 		//S135L
 		else if(((course[i-1] == STR && course[i] == S90L) && ((course[i+1] == S90L && course[i+2] == S90R)) && (dia_state == 0 && RE_flg == 1))){
 			t--; dia_course[t] = S135L;
@@ -633,6 +651,26 @@ void make_dia_course( void )
 			dia_state = 0;
 			RE_flg = 1;
 		}
+		// ----------------------------
+		//W90L
+		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == STR ) ){
+			dia_course[t] = HALF_STR; t++;
+			dia_course[t] = W90L; t++;
+			dia_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		//W90R
+		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == STR ) ){
+			dia_course[t] = HALF_STR; t++;
+			dia_course[t] = W90R; t++;
+			dia_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// ----------------------------
 		//S135L
 		else if(((course[i] == STR && course[i+1] == S90L) && (course[i+2] == S90L && course[i+3] == S90R)) && dia_state == 0){
 			if(course[i-1] == STR || course[i-1] == S90L || course[i-1] == S90R){

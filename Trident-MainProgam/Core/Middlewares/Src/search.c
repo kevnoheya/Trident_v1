@@ -537,7 +537,11 @@ void mouse_dia_try( void )
 						decel_speed = Global_Straight.Speed.Normal; break;
 					}
 				}
+				Ctrl_SideWall.Use = false;
+				Ctrl_FrontWall.Use = false;
+				Log_Start();
 				Move_Straight(127, decel_speed, Global_Straight.Speed.Acc);
+				Log_Stop();
 				readWall_flg = 0;
 				re_flg = false;
 				break;

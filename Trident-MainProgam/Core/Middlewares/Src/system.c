@@ -211,7 +211,7 @@ void mode1( int x )
 	Buzzer_Set_Confirm();
 
 	while( 1 ){
-		int submode = Select_Number( 1, 12 );
+		int submode = Select_Number( 1, 13 );
 		if( submode == -1 ){
 			break;
 		}else{
@@ -460,33 +460,34 @@ void mode1( int x )
 
 					dia_course[0] = HALF_STR;
 					dia_course[1] = S45R;
-					dia_course[2] = GOAL;
-					dia_course[3] = S180R;
+					dia_course[2] = S135L_RE;
+					dia_course[3] = GOAL;
 					dia_course[4] = HALF_STR;
 					dia_course[5] = GOAL;
 
 					mouse_dia_try();
 
-
-
-//					dia_course[0] = HALF_STR;
-//					dia_course[1] = S45R;
-//					dia_course[2] = S45L_RE;
-//					dia_course[3] = S135R;
-//					dia_course[4] = DSTR;
-//					dia_course[5] = V90R;
-//					dia_course[6] = DSTR;
-//					dia_course[7] = S135R_RE;
-//					dia_course[8] = HALF_STR;
-//					dia_course[9] = HALF_STR;
-//					dia_course[10] = S180R;
-//					dia_course[11] = GOAL;
-//
-//					mouse_dia_try();
 					MOT_Set_Dir( FREE, FREE );								// モータをフリー状態にする
 					LED_Switch_Wait();
 					Log_Print();
 
+					break;
+
+				case 13:
+					Param_Load();
+					LED_Start_Wait();
+					IMU_Calibrate();
+					LED_Set_Confirm();
+
+					dia_course[0] = HALF_STR;
+					dia_course[1] = S45R;
+					dia_course[2] = DSTR;
+					dia_course[3] = GOAL;
+					mouse_dia_try();
+
+					MOT_Set_Dir( FREE, FREE );								// モータをフリー状態にする
+					LED_Switch_Wait();
+					Log_Print();
 					break;
 				default:
 					printf("\r\n----------------ERROR --------------\r\n No Such Mode\r\n");

@@ -92,22 +92,22 @@ PARAM_SLALOM_T 		Global_T70 = {
 // éŒÇﬂÉpÉâÉÅÅ[É^
 PARAM_SLALOM_T 		Global_S45 = {
 	// Angle, Radius, In, Out, Speed, Kp, Ki, Kd
-		45, 100, 40, 58, 1400, 2.5, 0.06, 0.004
+		45, 100, 20, 58, 1400, 2.5, 0.06, 0.004
 };
 
 PARAM_SLALOM_T 		Global_RE_S45 = {
 	// Angle, Radius, In, Out, Speed, Kp, Ki, Kd
-		45, 100, 40, 60, 1400, 2.5, 0.06, 0.004
+		45, 100, 40, 10, 1400, 2.5, 0.06, 0.004
 };
 
 PARAM_SLALOM_T 		Global_S135 = {
 	// Angle, Radius, In, Out, Speed, Kp, Ki, Kd
-		135, 70, 55, 72, 1000, 2.5, 0.06, 0.004
+		135, 70, 55, 62, 1200, 2.5, 0.06, 0.004
 };
 
 PARAM_SLALOM_T 		Global_RE_S135 = {
 	// Angle, Radius, In, Out, Speed, Kp, Ki, Kd
-		135, 70, 55, 110, 1000, 2.5, 0.06, 0.004
+		135, 70, 55, 100, 1200, 2.5, 0.06, 0.004
 };
 
 PARAM_SLALOM_T 		Global_S180 = {
@@ -117,7 +117,7 @@ PARAM_SLALOM_T 		Global_S180 = {
 
 PARAM_SLALOM_T 		Global_V90 = {
 	// Angle, Radius, In, Out, Speed, Kp, Ki, Kd
-		90, 55, 35, 30, 1000, 2.5, 0.06, 0.004
+		90, 60, 35, 40, 1200, 2.5, 0.06, 0.004
 };
 
 PARAM_SLALOM_T 		Global_W90 = {
