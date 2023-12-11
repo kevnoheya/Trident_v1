@@ -53,6 +53,7 @@ extern unsigned char map[16][16];
 extern unsigned char p_map[16][16];
 extern volatile uint8_t map_course[256];
 extern volatile uint8_t wideturn_course[256];
+extern volatile uint8_t s45_course[256];
 extern volatile uint8_t dia_course[256];
 
 extern volatile uint8_t map_id;
@@ -79,6 +80,7 @@ int search_adachi( void );
 void make_try_map( void );
 void make_course( int goal_x, int goal_y );
 void make_wideturn_course( void );
+void make_s45_course( void );
 void make_dia_course( void );
 void map_copy_to( int id );
 void map_load_from( int id );

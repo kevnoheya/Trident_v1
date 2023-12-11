@@ -33,6 +33,8 @@ extern PARAM_SLALOM_T 		Global_RE_S135;
 extern PARAM_SLALOM_T 		Global_S180;
 extern PARAM_SLALOM_T 		Global_V90;
 extern PARAM_SLALOM_T 		Global_W90;
+
+extern PARAM_SLALOM_T 		Param_S90[PARAM_MAX];
 //************************************************
 // 関数プロトタイプ宣言
 //************************************************

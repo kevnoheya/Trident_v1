@@ -23,6 +23,7 @@ unsigned char backup_p_map[5][16][16];
 
 volatile uint8_t map_course[256];
 volatile uint8_t wideturn_course[256];
+volatile uint8_t s45_course[256];
 volatile uint8_t dia_course[256];
 volatile uint8_t course[256];
 
@@ -545,6 +546,159 @@ void make_wideturn_course( void )
 		t++;
 	}
 }
+
+//===============================================
+// map: 2時走行斜めcourse作成
+//===============================================
+void make_s45_course( void )
+{
+	// マップのコピー
+	for( int i = 0; i < 256; i++ )
+	{
+		if(map_course[i] == 0) course[i] = STR;
+		else if( map_course[i] == 1) course[i] = S90R;
+		else if( map_course[i] == 2) course[i] = REVERSE;
+		else if( map_course[i] == 3) course[i] = S90L;
+		else if( map_course[i] == 4){
+			course[i] = STR;
+			course[i+1] = GOAL;
+			break;
+		}
+	}
+
+	// 斜め変換
+	uint8_t i = 0; 	// course(スラロームコーズ)のカウンタ
+	uint8_t t = 0;	// s45_course(斜めコース)のカウンタ
+	uint8_t dia_state = 0; 	// 1: 斜めの時
+	uint8_t RE_flg = 0;
+
+	while( i < 256 ){
+		//S180L
+		if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == S90L && course[i+2] == STR && dia_state == 0 && RE_flg == 1) ){
+			t--; s45_course[t] = S180L; t++;
+			s45_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		//S180R
+		else if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == S90R && course[i+2] == STR)&& dia_state == 0 && RE_flg == 1 ){
+			t--; s45_course[t] = S180R; t++;
+			s45_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// ----------------------------
+		// W90L
+		else if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+			t--; s45_course[t] = W90L; t++;
+			s45_course[t] = HALF_STR;
+			i+=2;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// W90R
+		else if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+			t--; s45_course[t] = W90R; t++;
+			s45_course[t] = HALF_STR;
+			i+=2;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// ----------------------------
+
+		//S45RL
+		if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == S90L && course[i+2] == STR && dia_state == 0 && RE_flg == 1) ){
+			t--; s45_course[t] = S45RL; t++;
+			s45_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		//S45LR
+		else if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == S90R && course[i+2] == STR)&& dia_state == 0 && RE_flg == 1 ){
+			t--; s45_course[t] = S45LR; t++;
+			s45_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		//S180L
+		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == S90L && course[i+3] == STR) ){
+			s45_course[t] = HALF_STR; t++;
+			s45_course[t] = S180L; t++;
+			s45_course[t] = HALF_STR;
+			i+=4;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		//S180R
+		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == S90R && course[i+3] == STR) ){
+			s45_course[t] = HALF_STR; t++;
+			s45_course[t] = S180R; t++;
+			s45_course[t] = HALF_STR;
+			i+=4;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// ----------------------------
+		//W90L
+		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == STR ) ){
+			s45_course[t] = HALF_STR; t++;
+			s45_course[t] = W90L; t++;
+			s45_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		//W90R
+		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == STR ) ){
+			s45_course[t] = HALF_STR; t++;
+			s45_course[t] = W90R; t++;
+			s45_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// ----------------------------
+		//S45RL
+		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == S90L && course[i+3] == STR) ){
+			s45_course[t] = HALF_STR; t++;
+			s45_course[t] = S45RL; t++;
+			s45_course[t] = HALF_STR;
+			i+=4;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		//S45LR
+		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == S90R && course[i+3] == STR) ){
+			s45_course[t] = HALF_STR; t++;
+			s45_course[t] = S45LR; t++;
+			s45_course[t] = HALF_STR;
+			i+=4;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// GOAL
+		else if( course[i] == GOAL ){
+			s45_course[t] = GOAL;
+			break;
+		}
+		else{
+
+			//}else{
+				s45_course[t] = course[i];
+				i += 1;
+				dia_state = 0;
+			//}
+		}
+		t++;
+	}
+
+	if( s45_course[t-1] == STR ) s45_course[t-1] = GOAL;
+
+}
 //===============================================
 // map: 2時走行斜めcourse作成
 //===============================================
@@ -589,21 +743,21 @@ void make_dia_course( void )
 		}
 		// ----------------------------
 		// W90L
-		else if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
-			t--; dia_course[t] = W90L; t++;
-			dia_course[t] = HALF_STR;
-			i+=2;
-			dia_state = 0;
-			RE_flg = 1;
-		}
-		// W90R
-		else if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
-			t--; dia_course[t] = W90R; t++;
-			dia_course[t] = HALF_STR;
-			i+=2;
-			dia_state = 0;
-			RE_flg = 1;
-		}
+//		else if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+//			t--; dia_course[t] = W90L; t++;
+//			dia_course[t] = HALF_STR;
+//			i+=2;
+//			dia_state = 0;
+//			RE_flg = 1;
+//		}
+//		// W90R
+//		else if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+//			t--; dia_course[t] = W90R; t++;
+//			dia_course[t] = HALF_STR;
+//			i+=2;
+//			dia_state = 0;
+//			RE_flg = 1;
+//		}
 		// ----------------------------
 		//S135L
 		else if(((course[i-1] == STR && course[i] == S90L) && ((course[i+1] == S90L && course[i+2] == S90R)) && (dia_state == 0 && RE_flg == 1))){
@@ -652,24 +806,24 @@ void make_dia_course( void )
 			RE_flg = 1;
 		}
 		// ----------------------------
-		//W90L
-		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == STR ) ){
-			dia_course[t] = HALF_STR; t++;
-			dia_course[t] = W90L; t++;
-			dia_course[t] = HALF_STR;
-			i+=3;
-			dia_state = 0;
-			RE_flg = 1;
-		}
-		//W90R
-		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == STR ) ){
-			dia_course[t] = HALF_STR; t++;
-			dia_course[t] = W90R; t++;
-			dia_course[t] = HALF_STR;
-			i+=3;
-			dia_state = 0;
-			RE_flg = 1;
-		}
+//		//W90L
+//		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == STR ) ){
+//			dia_course[t] = HALF_STR; t++;
+//			dia_course[t] = W90L; t++;
+//			dia_course[t] = HALF_STR;
+//			i+=3;
+//			dia_state = 0;
+//			RE_flg = 1;
+//		}
+//		//W90R
+//		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == STR ) ){
+//			dia_course[t] = HALF_STR; t++;
+//			dia_course[t] = W90R; t++;
+//			dia_course[t] = HALF_STR;
+//			i+=3;
+//			dia_state = 0;
+//			RE_flg = 1;
+//		}
 		// ----------------------------
 		//S135L
 		else if(((course[i] == STR && course[i+1] == S90L) && (course[i+2] == S90L && course[i+3] == S90R)) && dia_state == 0){

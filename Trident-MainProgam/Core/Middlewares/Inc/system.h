@@ -43,5 +43,7 @@ void mode15( int x );
 int Select_Number( int min, int max );
 int Select_YesNo( void );
 void Select_Map( void );
+void Select_Goal( void );
+void Select_Change_S90( void );
 
 #endif /* MIDDLEWARES_SYSTEM_H_ */

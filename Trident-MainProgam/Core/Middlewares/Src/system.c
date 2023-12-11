@@ -612,7 +612,7 @@ void mode5( int x )
 
 	Param_Load();
 	Select_Map();
-	make_dia_course();
+	make_s45_course();
 
 	LED_Start_Wait();
 	IMU_Calibrate();
@@ -620,8 +620,9 @@ void mode5( int x )
 	LED_Set_Confirm();
 
 	Machine.State.FailSafe = false;
-	mouse_dia_try();
+	mouse_s45_try();
 	LED_Cleaning_Wait();
+
 }
 
 //===============================================
@@ -639,6 +640,19 @@ void mode6( int x )
 	// モード実行
 	LED_Set_Confirm();
 	Buzzer_Set_Confirm();
+
+	Param_Load();
+	Select_Map();
+	make_dia_course();
+
+	LED_Start_Wait();
+	IMU_Calibrate();
+
+	LED_Set_Confirm();
+
+	Machine.State.FailSafe = false;
+	mouse_dia_try();
+	LED_Cleaning_Wait();
 }
 
 //===============================================
@@ -775,6 +789,8 @@ void mode14( int x )
 	// モード実行
 	LED_Set_Confirm();
 	Buzzer_Set_Confirm();
+
+	Select_Change_S90();
 }
 
 //===============================================
@@ -792,6 +808,8 @@ void mode15( int x )
 	// モード実行
 	LED_Set_Confirm();
 	Buzzer_Set_Confirm();
+
+	Select_Goal();
 }
 
 //===============================================
@@ -871,5 +889,92 @@ void Select_Map( void )
 		make_course( GOAL_X, GOAL_Y );
 		writeFlash( course_start_address, (uint8_t*)map_course, sizeof(map_course));
 		map_load_from( id-1 );
+	}
+}
+
+//===============================================
+// 選択: ゴール座標を選択
+//===============================================
+void Select_Goal( void )
+{
+	int submode;
+
+	// Change GOAL _X
+	submode = GOAL_X;
+	while( 1 ){
+		LED_Disp_Binary( submode );
+		if( submode < 0 ) submode = 15;
+		else if( submode > 15 ) submode = 0;
+
+		if( Enc.Pulse.l > 1000 || Enc.Pulse.r > 1000 ){
+			submode++;
+			Enc.Pulse.l = 0; Enc.Pulse.r = 0;
+		}
+		else if( Enc.Pulse.l < -1000 || Enc.Pulse.r < -1000 ){
+			submode --;
+			Enc.Pulse.l = 0; Enc.Pulse.r = 0;
+		}
+		else if( SW_Read_R() == SW_ON ){
+			HAL_Delay( SW_WAIT );
+			LED_Set_Confirm();
+
+			GOAL_X = submode;
+			break;
+		}
+
+	}
+
+	// Change GOAL _Y
+	submode = GOAL_Y;
+	while( 1 ){
+		LED_Disp_Binary( submode );
+		if( submode < 0 ) submode = 15;
+		else if( submode > 15 ) submode = 0;
+
+		if( Enc.Pulse.l > 1000 || Enc.Pulse.r > 1000 ){
+			submode++;
+			Enc.Pulse.l = 0; Enc.Pulse.r = 0;
+		}
+		else if( Enc.Pulse.l < -1000 || Enc.Pulse.r < -1000 ){
+			submode --;
+			Enc.Pulse.l = 0; Enc.Pulse.r = 0;
+		}
+		else if( SW_Read_R() == SW_ON ){
+			HAL_Delay( SW_WAIT );
+			LED_Set_Confirm();
+
+			GOAL_Y = submode;
+			break;
+		}
+
+	}
+
+	LED_Set_Confirm();
+}
+
+//===============================================
+// 選択: スラのオフセットを調整
+//===============================================
+void Select_Change_S90( void )
+{
+	int param = Select_Number( 1, PARAM_MAX );
+	int in_out = Select_YesNo();
+	int plus_minus  = Select_YesNo();
+
+	int bias = Select_Number(1, 16);
+
+	// Out
+	if( in_out == 1 ){
+		if( plus_minus == 1){	// Plus
+			Param_S90[param].Out_Offset += bias;
+		}else{
+			Param_S90[param].Out_Offset -= bias;
+		}
+	}else{
+		if( plus_minus == 1){	// Plus
+			Param_S90[param].In_Offset += bias;
+		}else{
+			Param_S90[param].In_Offset -= bias;
+		}
 	}
 }
