@@ -185,6 +185,11 @@ void Control_Motor( void )
 			}
 		}
 
+		if(Ctrl_Angular.Use == 0){
+			Machine.Angular.Current = 0;
+		}
+
+
 		//---------------------------------------------------------------
 		// 角度のFB
 		Ctrl_Angular.Target = Machine.Angular.Current;
@@ -193,13 +198,13 @@ void Control_Motor( void )
 
 		//---------------------------------------------------------------
 		// Lモータ速度のFB
-		Ctrl_Speed_L.Target = Machine.V.Current;
+		Ctrl_Speed_L.Target = Machine.V.Current; //+ ((Machine.Angular.Current * DEG_TO_RAD * ROBOT_THREAD)/2);
 		Ctrl_Speed_L.Current = Enc.Speed.l;
 		Calc_PID( &Ctrl_Speed_L );
 
 		//---------------------------------------------------------------
 		// Rモータ速度のFB
-		Ctrl_Speed_R.Target = Machine.V.Current;
+		Ctrl_Speed_R.Target = Machine.V.Current; //- ((Machine.Angular.Current * DEG_TO_RAD * ROBOT_THREAD)/2);
 		Ctrl_Speed_R.Current = Enc.Speed.r;
 		Calc_PID( &Ctrl_Speed_R );
 
@@ -215,8 +220,8 @@ void Control_Motor( void )
 
 		//---------------------------------------------------------------
 		// 制御量をモータに代入
-		Machine.Motor.l = Ctrl_Speed_L.Output + Ctrl_SideWall.Output + Ctrl_FrontWall.Output + Ctrl_Angular.Output;
-		Machine.Motor.r = Ctrl_Speed_R.Output -(Ctrl_SideWall.Output + Ctrl_FrontWall.Output + Ctrl_Angular.Output);
+		Machine.Motor.l = Ctrl_Speed_L.Output + Ctrl_SideWall.Output + Ctrl_FrontWall.Output + Ctrl_Angular.Output ;
+		Machine.Motor.r = Ctrl_Speed_R.Output -(Ctrl_SideWall.Output + Ctrl_FrontWall.Output + Ctrl_Angular.Output );
 		MOT_Set_Duty( Machine.Motor.l, Machine.Motor.r );
 	}
 	else{

@@ -47,6 +47,7 @@ void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef *htim )
 	// TIM5割込み処理 1ms ( システム関連 )
 	if( htim == &htim5 )
 	{
+		IMU_Read();								// IMUセンサ値の取得
 		//---------------------------------------------
 		// バッテリ監視
 //		if( Batt_Get_V() < 7.0 && activeTime.s > 5 ){	// 7.0V以下音がずっと流れる
@@ -146,7 +147,7 @@ void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef *htim )
 	// TIM6割込み処理 1ms ( データ取得関連 )
 	if( htim == &htim6 )
 	{
-		IMU_Read();								// IMUセンサ値の取得
+
 		ENC_Read();								// エンコーダ値の取得
 
 		//---------------------------------------------

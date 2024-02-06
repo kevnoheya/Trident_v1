@@ -591,21 +591,21 @@ void make_s45_course( void )
 		}
 		// ----------------------------
 		// W90L
-		else if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
-			t--; s45_course[t] = W90L; t++;
-			s45_course[t] = HALF_STR;
-			i+=2;
-			dia_state = 0;
-			RE_flg = 1;
-		}
-		// W90R
-		else if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
-			t--; s45_course[t] = W90R; t++;
-			s45_course[t] = HALF_STR;
-			i+=2;
-			dia_state = 0;
-			RE_flg = 1;
-		}
+//		else if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+//			t--; s45_course[t] = W90L; t++;
+//			s45_course[t] = HALF_STR;
+//			i+=2;
+//			dia_state = 0;
+//			RE_flg = 1;
+//		}
+//		// W90R
+//		else if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+//			t--; s45_course[t] = W90R; t++;
+//			s45_course[t] = HALF_STR;
+//			i+=2;
+//			dia_state = 0;
+//			RE_flg = 1;
+//		}
 		// ----------------------------
 
 		//S45RL
@@ -644,23 +644,23 @@ void make_s45_course( void )
 		}
 		// ----------------------------
 		//W90L
-		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == STR ) ){
-			s45_course[t] = HALF_STR; t++;
-			s45_course[t] = W90L; t++;
-			s45_course[t] = HALF_STR;
-			i+=3;
-			dia_state = 0;
-			RE_flg = 1;
-		}
-		//W90R
-		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == STR ) ){
-			s45_course[t] = HALF_STR; t++;
-			s45_course[t] = W90R; t++;
-			s45_course[t] = HALF_STR;
-			i+=3;
-			dia_state = 0;
-			RE_flg = 1;
-		}
+//		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == STR ) ){
+//			s45_course[t] = HALF_STR; t++;
+//			s45_course[t] = W90L; t++;
+//			s45_course[t] = HALF_STR;
+//			i+=3;
+//			dia_state = 0;
+//			RE_flg = 1;
+//		}
+//		//W90R
+//		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == STR ) ){
+//			s45_course[t] = HALF_STR; t++;
+//			s45_course[t] = W90R; t++;
+//			s45_course[t] = HALF_STR;
+//			i+=3;
+//			dia_state = 0;
+//			RE_flg = 1;
+//		}
 		// ----------------------------
 		//S45RL
 		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == S90L && course[i+3] == STR) ){
