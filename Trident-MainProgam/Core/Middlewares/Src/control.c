@@ -18,6 +18,8 @@ CTRL_T 			Ctrl_FrontWall;
 
 volatile double WallDist_FL;
 volatile double WallDist_FR;
+volatile uint8_t PillarDetect_L;
+volatile uint8_t PillarDetect_R;
 
 //===============================================
 // §Œä : PIDŒvŽZŠÖ”
@@ -53,10 +55,12 @@ void Control_Param_Init( void )
 //===============================================
 void Control_Side_Wall( void )
 {
+	double target_angle = 0;
+	//--------------------------------
+	// ’¼i‚Ì•Ç§Œä
 	if( Ctrl_SideWall.Use ){
-		double target_angle = 0;
 		double Err_Angle_L = ((-6.0 * pow(10, -9) * pow(WallSen.Value[L], 3)) + (4.0 * pow(10, -5) * pow(WallSen.Value[L], 2)) + (-0.0812 * WallSen.Value[L]) + 32.05) * -1.0;
-		double Err_Angle_R = ( (-1.0*pow(10, -8)*pow(WallSen.Value[R], 3)) + (-0.0001*pow(WallSen.Value[R], 2)) + (0.2057*WallSen.Value[R]) + (-36.771) ) * -1.0;
+		double Err_Angle_R = ( (6.0*pow(10, -7)*pow(WallSen.Value[R], 3)) + (-0.0006*pow(WallSen.Value[R], 2)) + (0.33*WallSen.Value[R]) + (-40.099) ) * -1.0;
 
 		if(WallSen.Value[L] > Global_WSen.Ctrl_Lim.l && WallSen.Value[R] > Global_WSen.Ctrl_Lim.r ){
 			if( fabs(Err_Angle_L) > fabs(Err_Angle_R) ) target_angle = Err_Angle_L;
@@ -70,8 +74,105 @@ void Control_Side_Wall( void )
 		}
 		Machine.Angle.Target = target_angle;
 
+		Ctrl_SideWall.Kp = Global_WSen.Kp;
+		Ctrl_SideWall.Ki = Global_WSen.Ki;
+		Ctrl_SideWall.Kd = Global_WSen.Kd;
+
+	//--------------------------------
+	// ŽÎ‚ß‚Ì’Œ§Œä
+	}else if( Machine.Dia_State){
+		if( Machine.State.TurnDir == L_TURN ){
+			if( PillarDetect_L > 3 ){
+				target_angle = (WallSen.PastValue[L] - 1300 ) * 0.5;
+//				if( WallSen.PastValue[L] > 1500 ){
+//					target_angle = 0.5;
+//					led1_irq_flg = 1;
+//					led2_irq_flg = 1;
+//				}else if( WallSen.PastValue[L] < 1000 ){
+//					target_angle = -0.5;
+//					led3_irq_flg = 1;
+//					led4_irq_flg = 1;
+//				}else{
+//					target_angle = 0;
+//					led1_irq_flg = 1;
+//					led4_irq_flg = 1;
+//				}
+
+				PillarDetect_L++;
+//				if(PillarDetect_L > 5 )
+//					target_angle *= -1;
+				if( PillarDetect_L > 6 ){
+					target_angle = 0;
+					PillarDetect_L = 0;
+					WallSen.PastValue[L] = 0;
+					Machine.State.TurnDir = !Machine.State.TurnDir;
+				}
+			}
+		}else if( Machine.State.TurnDir == R_TURN ){
+			if( PillarDetect_R > 3 ){
+				target_angle = (WallSen.PastValue[R] - 450) * 0.5;
+//				if( WallSen.PastValue[R] < 200 ){
+//					target_angle = 0.5;
+//					led1_irq_flg = 1;
+//					led2_irq_flg = 1;
+//				}else if( WallSen.PastValue[R] > 650 ){
+//					target_angle = -0.5;
+//					led3_irq_flg = 1;
+//					led4_irq_flg = 1;
+//				}else{
+//					target_angle = 0;
+//					led1_irq_flg = 1;
+//					led4_irq_flg = 1;
+//				}
+
+				PillarDetect_R++;
+//				if(PillarDetect_R > 5 )
+//					target_angle *= -1;
+				if( PillarDetect_R > 6 ){
+					target_angle = 0;
+					PillarDetect_R = 0;
+					WallSen.PastValue[R] = 0;
+					Machine.State.TurnDir = !Machine.State.TurnDir;
+				}
+			}
+		}
+//		if( WallSen.PastValue[L] < WallSen.Value[L] ){
+//			WallSen.PastValue[L] = WallSen.Value[L];
+//		}else{
+//			if( WallSen.PastValue[L] > 1300 ){
+//				target_angle = 1;
+//				led1_irq_flg = 1;
+//			}else if( WallSen.PastValue[L] < 1200 ){
+//				target_angle = -1;
+//				led4_irq_flg = 1;
+//			}
+//		}
+//
+//		if( WallSen.PastValue[R] < WallSen.Value[R] ){
+//			WallSen.PastValue[R] = WallSen.Value[R];
+//		}else{
+//			if( WallSen.PastValue[R] > 450 ){
+//				target_angle = -1;
+//				led4_irq_flg = 1;
+//			}else if( WallSen.PastValue[R] < 400 ){
+//				target_angle = 1;
+//				led1_irq_flg = 1;
+//			}
+//		}
+
+		Ctrl_SideWall.Use = true;
+		Machine.Angle.Target = target_angle;
+
+		Ctrl_SideWall.Kp = 0.1;
+		Ctrl_SideWall.Ki = 0.01;
+		Ctrl_SideWall.Kd = 0.001;
+
 	}else{
 		Machine.Angle.Target = 0;
+		WallSen.PastValue[FL] = 0;
+		WallSen.PastValue[L] = 0;
+		WallSen.PastValue[R] = 0;
+		WallSen.PastValue[FR] = 0;
 	}
 
 	Ctrl_SideWall.Target = Machine.Angle.Target;

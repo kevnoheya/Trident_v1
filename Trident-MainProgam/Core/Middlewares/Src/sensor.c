@@ -119,14 +119,16 @@ void WallSen_Get_Value( void )
 		else if( WallSen.Ct <= ( SEN_WAIT + OFF_SAMPLING + SEN_WAIT + ON_SAMPLING) + SEN_WAIT ){
 			LED_WALL_FL( SEN_OFF );
 			LED_WALL_R( SEN_OFF );
-		}
-		// L, FRがONにFL, RがOFFにするまで待つ
-		else if( WallSen.Ct <= ( SEN_WAIT + OFF_SAMPLING + SEN_WAIT + ON_SAMPLING + SEN_WAIT + SEN_WAIT )){
 			 LED_WALL_L( SEN_ON );
 			 LED_WALL_FR( SEN_ON );
 		}
+		// L, FRがONにFL, RがOFFにするまで待つ
+//		else if( WallSen.Ct <= ( SEN_WAIT + OFF_SAMPLING + SEN_WAIT + ON_SAMPLING + SEN_WAIT + SEN_WAIT )){
+//			 LED_WALL_L( SEN_ON );
+//			 LED_WALL_FR( SEN_ON );
+//		}
 		// L, FRのLEDがONの時，サンプリング
-		else if( WallSen.Ct <= ( SEN_WAIT + OFF_SAMPLING + SEN_WAIT + ON_SAMPLING + SEN_WAIT + SEN_WAIT + ON_SAMPLING )){
+		else if( WallSen.Ct <= ( SEN_WAIT + OFF_SAMPLING + SEN_WAIT + ON_SAMPLING + SEN_WAIT + ON_SAMPLING )){
 			WallSen.Value_On[L] += WallSen.Buffer[L];
 			WallSen.Value_On[FR] += WallSen.Buffer[FR];
 		}

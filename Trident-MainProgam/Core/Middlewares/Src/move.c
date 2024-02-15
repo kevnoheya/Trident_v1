@@ -69,9 +69,11 @@ void Move_Slalom_Turn2( PARAM_SLALOM_T *sla, int dir )
 		}
 	}
 
+	Machine.State.TurnDir = dir;
 	Ctrl_Angular.Use = false;
 	Machine.Alpha.Target = 0;
 	Machine.Angular.Target = 0;
+	Machine.Angular.Current = 0;
 	IMU.Angle.z -= angle;
 //	Enc.Position.angle -= sla->Angle;
 	Enc.Position.y = 0;
@@ -386,16 +388,16 @@ void Move_Straight_Acc( uint8_t mass, uint16_t v1, uint16_t v2, uint16_t v3, uin
 {
 	uint32_t y, v;
 	uint8_t deacc_mass;
-	if( mass <= 2 ){
+	if( mass <= 1 ){
 		y = Global_Straight.Dist.Full;
 		v = v1;
 		deacc_mass = 0;
 	}else{
 		y = mass* Global_Straight.Dist.Full;
-		v = sqrt((2 * acc * y/2 * 1000) + pow(v1, 2));
+		v = sqrt((2 * acc * y/4*3 * 1000) + pow(v1, 2));
 		if( v > v3 ) v = v3;
 		deacc_mass = ceil(((pow(v, 2) - pow(v1, 2)) / (2.0 * deacc  * 1000))/180.0);
-		//if( v > 3000 ) deacc_mass ++;
+		//if( v > 3800 ) deacc_mass ++;
 	}
 
 	Ctrl_SideWall.Use = true;
@@ -407,14 +409,113 @@ void Move_Straight_Acc( uint8_t mass, uint16_t v1, uint16_t v2, uint16_t v3, uin
 		}
 	}else{
 		for( int i = 0; i < (mass-deacc_mass); i++){
+			//read_wall_data();
 			Global_WSen.SideEnd.Use = false;
 			Move_Straight( Global_Straight.Dist.Full, v, acc);
 		}
-		for( int i = 0; i < deacc_mass; i++ ){
-			read_wall_data();
-			Global_WSen.SideEnd.Use = true;
+		for( int i = 0; i < deacc_mass - 1; i++ ){
+			//read_wall_data();
+			Global_WSen.SideEnd.Use = false;
 			Move_Straight( Global_Straight.Dist.Full, v1, deacc );
 		}
+
+		read_wall_data();
+		Global_WSen.SideEnd.Use = true;
+		Move_Straight( Global_Straight.Dist.Full, v1, deacc );
+	}
+/* ----------------------------------------------
+	uint16_t v;
+	uint8_t deacc_mass;
+	uint8_t add_y = 0;
+//	uint32_t acc_v3_y = ((pow(v3, 2) - pow(v1, 2)) / (2.0 * acc * 1000));
+//	uint32_t acc_v2_y = ((pow(v2, 2) - pow(v1, 2)) / (2.0 * acc * 1000));
+	uint32_t deacc_v3_y = ((pow(v3, 2) - pow(v1, 2)) / (2.0 * deacc  * 1000));
+	uint32_t deacc_v2_y = ((pow(v2, 2) - pow(v1, 2)) / (2.0 * deacc  * 1000));
+//
+//	if( (acc_v3_y + deacc_v3_y )/180 < mass ){
+//		v = v3;
+//		deacc_mass = ceil((deacc_v3_y/180)) + 1;
+//	}else if( mass >= 6){
+//		v = v3;
+//		deacc_mass = ceil((deacc_v3_y/180)) + 1;
+//	}else if( (acc_v2_y + deacc_v2_y)/180 < mass){
+//		v = v2;
+//		deacc_mass = ceil((deacc_v2_y/180)) + 1  ;
+//	}else{
+//		v = v1;
+//		deacc_mass = 0 ;
+//	}
+
+	if( mass >= 8 ){
+		v = v3;
+		deacc_mass = ceil((deacc_v3_y/180)) + 1;
+	}else if(mass > 2){
+		v = v2;
+		deacc_mass = ceil((deacc_v2_y/180)) + 1  ;
+	}else{
+		v = v1;
+		deacc_mass = 0;
+	}
+	Ctrl_SideWall.Use = true;
+	if( deacc_mass == 0 ){
+		for( int i = 0; i < mass; i++ ){
+			read_wall_data();
+			Global_WSen.SideEnd.Use = true;
+			Move_Straight( Global_Straight.Dist.Full, v, acc );
+		}
+	}else{
+		for( int i = 0; i < (mass-deacc_mass); i++){
+//			if( v >= 3800 ){
+//				add_y = 1;
+//			}
+			Global_WSen.SideEnd.Use = false;
+			Move_Straight( Global_Straight.Dist.Full + add_y, v, acc);
+		}
+		for( int i = 0; i < deacc_mass; i++ ){
+			if( deacc_mass == i - 1){
+			read_wall_data();
+			Global_WSen.SideEnd.Use = true;
+			}
+			Move_Straight( Global_Straight.Dist.Full, v1, deacc );
+		}
+	}
+---------------------------------------------- */
+
+}
+
+//===============================================
+// ˆÚ“® :@ŽÎ‚ß‚Ì‰ÁŒ¸‘¬’¼i( )
+//==============================================
+void Move_DStraight_Acc( uint8_t mass, uint16_t v1, uint16_t v2, uint16_t v3, uint16_t acc, uint16_t deacc )
+{
+	uint32_t y, v;
+	uint8_t deacc_mass;
+	if( mass <= 2 ){
+		y = 127;
+		v = v1;
+		deacc_mass = 0;
+	}else{
+		y = mass* 127;
+		v = sqrt((2 * acc * y/2 * 1000) + pow(v1, 2));
+		if( v > v2 ) v = v2;
+		deacc_mass = ceil(((pow(v, 2) - pow(v1, 2)) / (2.0 * deacc  * 1000))/127.0);
+		if( v > 3800 ) deacc_mass ++;
+	}
+
+	Ctrl_SideWall.Use = true;
+	if( deacc_mass == 0 ){
+		for( int i = 0; i < mass; i++ ){
+			Move_Straight( 127, v, acc );
+		}
+	}else{
+		for( int i = 0; i < (mass-deacc_mass); i++){
+			Move_Straight( 127, v, acc);
+		}
+		for( int i = 0; i < deacc_mass - 1; i++ ){
+			Move_Straight( 127, v1, deacc );
+		}
+
+		Move_Straight( 127, v1, deacc );
 	}
 /* ----------------------------------------------
 	uint16_t v;

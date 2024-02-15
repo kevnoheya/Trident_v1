@@ -29,6 +29,7 @@ void Move_Straight( int16_t y, int16_t v, uint16_t a );
 void Move_Straight_Stop( int32_t y, int32_t v, uint16_t a );
 void Move_Straight2Half( int32_t y, int32_t v, uint16_t a );
 void Move_Straight_Acc( uint8_t mass, uint16_t v1, uint16_t v2, uint16_t v3, uint16_t acc, uint16_t deacc );
+void Move_DStraight_Acc( uint8_t mass, uint16_t v1, uint16_t v2, uint16_t v3, uint16_t acc, uint16_t deacc );
 void Move_Stop( void );
 
 #endif /* MIDDLEWARES_MOVE_H_ */

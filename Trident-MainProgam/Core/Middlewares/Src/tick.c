@@ -21,7 +21,9 @@ uint16_t led2_ct;
 uint16_t led3_ct;
 uint16_t led4_ct;
 
-uint16_t FS_Turn_ct;
+uint16_t fs_speed_ct;
+uint16_t fs_angular_ct;
+uint16_t fs_angle_ct;
 //===============================================
 // 割り込み : 初期化
 //===============================================
@@ -47,7 +49,7 @@ void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef *htim )
 	// TIM5割込み処理 1ms ( システム関連 )
 	if( htim == &htim5 )
 	{
-		IMU_Read();								// IMUセンサ値の取得
+
 		//---------------------------------------------
 		// バッテリ監視
 //		if( Batt_Get_V() < 7.0 && activeTime.s > 5 ){	// 7.0V以下音がずっと流れる
@@ -141,22 +143,41 @@ void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef *htim )
 			led4_ct = 0;
 			led4_irq_flg = 0;
 		}
-    }
 
-    //---------------------------------------------
-	// TIM6割込み処理 1ms ( データ取得関連 )
-	if( htim == &htim6 )
-	{
-
-		ENC_Read();								// エンコーダ値の取得
-
-		//---------------------------------------------
+				//---------------------------------------------
         // フェイルセーフ処理
 		if( Machine.State.Running == true && Machine.State.FailSafe == false ){
 			// 左ボタンが押された時
 			if( SW_Read_L() == SW_ON ){
 				Machine.State.FailSafe = true;
 			}
+			// 目標速度より遅い時
+			else if( (fabs(Machine.V.Current - Enc.Speed.lr) > Machine.V.Current*0.1) && Ctrl_Angular.Use == false ){
+				fs_speed_ct++;				// 時間測定
+				if( fs_speed_ct > 2000 ){		// 0.5s以上の時
+					Machine.State.FailSafe = true;
+				}
+			}
+
+			//　旋回時に最大時間を設ける
+			else if( Machine.Angular.Current > 0 ){
+				fs_angular_ct++;
+				if( fs_angular_ct > 3000 ){
+					Machine.State.FailSafe = true;
+				}
+			}
+			// 直線時目標角度との差が30°以上時
+			else if( (fabs(Machine.Angle.Target - IMU.Angle.z) > 30) && Ctrl_Angular.Use == false ){
+				fs_angle_ct++;
+				if( fs_angle_ct > 10 )
+				Machine.State.FailSafe = true;
+			}
+			else{
+				fs_angle_ct = 0;
+				fs_angular_ct = 0;
+				fs_speed_ct = 0;
+			}
+
 //			// 角速度の誤差が一定時間で大きい時
 //			else if( Machine.State.Turning == true ){
 //				if( fabs(IMU.Gyro.z - Machine.Angular.Current) >= 500.0){
@@ -174,7 +195,18 @@ void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef *htim )
 
 		}else{
 			Machine.State.FailSafe = false;
+			fs_angular_ct = 0;
+			fs_speed_ct = 0;
 		}
+
+    }
+
+    //---------------------------------------------
+	// TIM6割込み処理 1ms ( データ取得関連 )
+	if( htim == &htim6 )
+	{
+		IMU_Read();								// IMUセンサ値の取得
+		ENC_Read();								// エンコーダ値の取得
 
     }
 

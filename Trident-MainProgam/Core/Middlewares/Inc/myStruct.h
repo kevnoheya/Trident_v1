@@ -35,6 +35,8 @@ typedef struct _WSENSOR_T{
 	bool Debug_On2Off;						//
 	volatile uint16_t Debug_Ct;				//
 	volatile uint16_t Debug_Value[4][128];	//
+	// 斜め中の柱制御
+	volatile int16_t PastValue[4];
 }WSENSOR_T;
 
 
@@ -143,7 +145,7 @@ typedef struct _CTRL_T{
 //************************************************
 typedef struct _MACHINE_T{
 	bool Control;			// 機体の制御フラグ
-
+	bool Dia_State;
 	struct velocity_type{		// 機体の速度
 		int16_t Target;
 		int16_t Current;
@@ -173,6 +175,7 @@ typedef struct _MACHINE_T{
 		bool Running;
 		bool FailSafe;
 		bool Turning;
+		bool TurnDir;
 	}State;
 }MACHINE_V_T;
 

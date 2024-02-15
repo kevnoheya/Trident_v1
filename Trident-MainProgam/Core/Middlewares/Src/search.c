@@ -10,11 +10,15 @@
 void mouse_search( int goal_x, int goal_y, int return_flg )
 {
 	uint8_t motion;
-	head = 0;
 
+
+	Move_Straight(Global_Straight.Dist.Start, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
 	Ctrl_SideWall.Use = true;
 	Machine.State.Running = true;
-	Move_Straight(Global_Straight.Dist.Start, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
+	Enc.Position.angle = 0;
+	Enc.Position.x = 0;
+	Enc.Position.y = 0;
+
 	//探索ループ開始
 	while( 1 ){
 		if( Machine.State.FailSafe == true )
@@ -29,7 +33,7 @@ void mouse_search( int goal_x, int goal_y, int return_flg )
 
 		make_potential( goal_x, goal_y, 0 );				//ポテンシャルマップ更新
 
-		motion = search_adachi();					//探索アルゴリズムを足立法にセット
+		motion = search_adachi( S_MODE );					//探索アルゴリズムを足立法にセット
 
 		if( (pos_x == goal_x && pos_y == goal_y) && return_flg == 1 )
 		{
@@ -91,11 +95,14 @@ void mouse_search( int goal_x, int goal_y, int return_flg )
 		    // goal
 			case  4 :
 				Ctrl_SideWall.Use = false;
+				//Move_Recovery();
+				//Move_Stop();
 				Move_Straight_Stop(Global_Straight.Dist.Half, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
 				Move_Stop();
 				Machine.Control = false;
 				head_change = 2;          			// 進行方向更新変数を後に設定
 				head = ( head + head_change ) & 0x03; 		// 詳細は下を参照
+				HAL_Delay(1000);
 				return;
 				break;
 
@@ -679,6 +686,7 @@ void mouse_dia_try( void )
 	Move_Straight(Global_Straight.Dist.Start, Global_Straight.Speed.Normal, 10);
 	//探索ループ開始
 	while( 1 ){
+		Machine.Dia_State = false;
 		if( Machine.State.FailSafe == true )
 			break;
 
@@ -719,6 +727,10 @@ void mouse_dia_try( void )
 						decel_speed = Global_S45.Speed; break;
 					case S45LR:
 						decel_speed = Global_S45.Speed; break;
+					case W90R:
+						decel_speed = Global_W90.Speed; break;
+					case W90L:
+						decel_speed = Global_W90.Speed; break;
 					default:
 						decel_speed = Global_Straight.Speed.Normal; break;
 				}
@@ -766,14 +778,21 @@ void mouse_dia_try( void )
 		        break;
 		    // goal
 			case  GOAL :
-				//Move_Straight_Stop(Global_Straight.Dist.Half, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
+				Ctrl_SideWall.Use = false;
+				Move_Straight_Stop(Global_Straight.Dist.Half, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
 				Move_Stop();
 				Machine.Control = false;
 				//LED_Set_Motion();
 
+				head_change = 2;          			// 進行方向更新変数を後に設定
+				head = ( head + head_change ) & 0x03; 		// 詳細は下を参照
 				return;
 				break;
 			case DSTR:
+//				uint8_t dmass = 1;
+//		    	while( dia_course[map_count+dmass] == DSTR){
+//		    		dmass++;
+//		    	}
 				if( dia_course[map_count+1] != DSTR){
 					switch( dia_course[map_count+1]){
 					case S45R:
@@ -788,15 +807,21 @@ void mouse_dia_try( void )
 						decel_speed = Global_S180.Speed; break;
 					case S180L:
 						decel_speed = Global_S180.Speed; break;
+					case W90R:
+						decel_speed = Global_W90.Speed; break;
+					case W90L:
+						decel_speed = Global_W90.Speed; break;
 					default:
-						decel_speed = Global_Straight.Speed.Normal; break;
+						decel_speed = decel_speed; break;
 					}
 				}
+
+				Machine.Dia_State = true;
 				Ctrl_SideWall.Use = false;
 				Ctrl_FrontWall.Use = false;
-				Log_Start();
-				Move_Straight(127, decel_speed, Global_Straight.Speed.Acc);
-				Log_Stop();
+				Move_Straight(127, decel_speed,  Global_Straight.Speed.Acc);
+				//Move_DStraight_Acc(dmass, decel_speed,  Global_Straight.Speed.Fast, Global_Straight.Speed.Long_Fast, Global_Straight.Speed.Acc, Global_Straight.Speed.Deacc);
+				//map_count += dmass-1;
 				readWall_flg = 0;
 				re_flg = false;
 				break;
@@ -1003,6 +1028,10 @@ void mouse_dia_try( void )
 					decel_speed = Global_S180.Speed; readWall_flg = 2; break;
 				case S180L:
 					decel_speed = Global_S180.Speed; readWall_flg = 2; break;
+				case W90R:
+					decel_speed = Global_W90.Speed; readWall_flg = 2; break;
+				case W90L:
+					decel_speed = Global_W90.Speed; readWall_flg = 2; break;
 				default:
 					decel_speed = Global_Straight.Speed.Fast; readWall_flg = 1; break;
 				}
@@ -1066,8 +1095,441 @@ void mouse_dia_try( void )
 		map_count++;
 	}
 
+	Machine.State.FailSafe = true;
+
+	MOT_Set_Dir( BRAKE, BRAKE );
+	Machine.Control = false;
+	Machine.State.Running = false;
+	Machine.State.FailSafe = false;
+}
+
+//===============================================
+// search: 斜め走行
+//===============================================
+void mouse_dia_odo_try( void )
+{
+	uint16_t decel_speed;
+	uint8_t map_count = 0;
+
+	uint8_t readWall_flg = 1;
+	bool re_flg = false;
+	head = 0;
+
+	Ctrl_SideWall.Use = true;
+	Machine.State.Running = true;
+	Move_Straight(Global_Straight.Dist.Start, Global_Straight.Speed.Normal, 10);
+	//探索ループ開始
+	while( 1 ){
+		Machine.Dia_State = false;
+		if( Machine.State.FailSafe == true )
+			break;
+
+		if( readWall_flg == 1){
+			read_wall_data();
+			led3_irq_flg = 1;
+			led2_irq_flg = 1;
+		}else if( readWall_flg == 0 ){
+			fwall = 0; rwall = 0; lwall = 0;
+		}
+		//motion = dia_course[map_count];					//探索アルゴリズムを足立法にセット
+
+	   	switch( dia_course[map_count] ){
+		    // 直進
+		    case  STR :
+		    	Ctrl_SideWall.Use = true;
+		    	Global_WSen.SideEnd.Use = 1;
+		    	//Move_Straight( Global_Straight.Dist.Full, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
+
+		    	uint8_t mass = 1;
+		    	while( dia_course[map_count+mass] == STR){
+		    		mass++;
+		    	}
+		    	switch( dia_course[map_count+mass+1]){	// HALF_STR必ずある？
+					case S45R:
+						decel_speed = Global_S45.Speed; break;
+					case S45L:
+						decel_speed = Global_S45.Speed; break;
+					case S135R:
+						decel_speed = Global_S135.Speed; break;
+					case S135L:
+						decel_speed = Global_S135.Speed; break;
+					case S180R:
+						decel_speed = Global_S180.Speed; break;
+					case S180L:
+						decel_speed = Global_S180.Speed; break;
+					case S45RL:
+						decel_speed = Global_S45.Speed; break;
+					case S45LR:
+						decel_speed = Global_S45.Speed; break;
+					case W90R:
+						decel_speed = Global_W90.Speed; break;
+					case W90L:
+						decel_speed = Global_W90.Speed; break;
+					default:
+						decel_speed = Global_Straight.Speed.Normal; break;
+				}
+		    	Move_Straight_Acc( mass, decel_speed, Global_Straight.Speed.Fast, Global_Straight.Speed.Long_Fast, Global_Straight.Speed.Acc, Global_Straight.Speed.Deacc);
+		    	map_count += mass-1;
+		    	Global_WSen.SideEnd.Use = 0;
+
+		    	readWall_flg = 1;
+		    	re_flg = false;
+		    	head_change = 0;
+		    	break;
+		    // 右折
+		    case  S90R :
+		    	Ctrl_SideWall.Use = false;
+		    	Ctrl_FrontWall.Use = true;
+		    	Move_Straight(Global_S90.In_Offset, Global_S90.Speed, Global_Straight.Speed.Acc);
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_S90, R_TURN );
+				//Move_Slalom_Turn2( &Global_S90R );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_S90.Out_Offset, Global_S90.Speed, Global_Straight.Speed.Acc);
+
+				readWall_flg = 1;
+				re_flg = false;
+		      	break;
+
+		    // 反転(Recovery)
+			case  REVERSE :
+				Move_Recovery();
+		        break;
+		    // 左折
+			case  S90L :
+				Ctrl_SideWall.Use = false;
+				Ctrl_FrontWall.Use = true;
+		    	Move_Straight(Global_S90.In_Offset, Global_S90.Speed, Global_Straight.Speed.Acc);
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_S90, L_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_S90.Out_Offset, Global_S90.Speed, Global_Straight.Speed.Acc);
+
+				readWall_flg = 1;
+				re_flg = false;
+		        head_change = 3;         			//進行方向更新変数を右に設定
+		        break;
+		    // goal
+			case  GOAL :
+				//Move_Straight_Stop(Global_Straight.Dist.Half, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
+				Move_Stop();
+				Machine.Control = false;
+				//LED_Set_Motion();
+
+				return;
+				break;
+			case DSTR:
+//				uint8_t dmass = 1;
+//		    	while( dia_course[map_count+dmass] == DSTR){
+//		    		dmass++;
+//		    	}
+				if( dia_course[map_count+1] != DSTR){
+					switch( dia_course[map_count+1]){
+					case S45R:
+						decel_speed = Global_S45.Speed; break;
+					case S45L:
+						decel_speed = Global_S45.Speed; break;
+					case S135R:
+						decel_speed = Global_S135.Speed; break;
+					case S135L:
+						decel_speed = Global_S135.Speed; break;
+					case S180R:
+						decel_speed = Global_S180.Speed; break;
+					case S180L:
+						decel_speed = Global_S180.Speed; break;
+					case W90R:
+						decel_speed = Global_W90.Speed; break;
+					case W90L:
+						decel_speed = Global_W90.Speed; break;
+					default:
+						decel_speed = decel_speed; break;
+					}
+				}
+
+				Machine.Dia_State = true;
+				Ctrl_SideWall.Use = false;
+				Ctrl_FrontWall.Use = false;
+				Move_Straight(127, decel_speed,  Global_Straight.Speed.Acc);
+				//Move_DStraight_Acc(dmass, decel_speed,  Global_Straight.Speed.Fast, Global_Straight.Speed.Long_Fast, Global_Straight.Speed.Acc, Global_Straight.Speed.Deacc);
+				//map_count += dmass-1;
+				readWall_flg = 0;
+				re_flg = false;
+				break;
+
+			case S45R:
+				Ctrl_SideWall.Use = true;
+				Ctrl_FrontWall.Use = false;
+				Global_WSen.SideEnd.Use = 2;
+		    	Move_Straight(Global_S45.In_Offset, Global_S45.Speed, Global_Straight.Speed.Acc);
+		    	Global_WSen.SideEnd.Use = 0;
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_S45, R_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = false;
+				Move_Straight(Global_S45.Out_Offset, Global_S45.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = false;
+				break;
+			case S45L:
+				Ctrl_SideWall.Use = true;
+				Ctrl_FrontWall.Use = false;
+				Global_WSen.SideEnd.Use = 2;
+		    	Move_Straight(Global_S45.In_Offset, Global_S45.Speed, Global_Straight.Speed.Acc);
+		    	Global_WSen.SideEnd.Use = 0;
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_S45, L_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = false;
+				Move_Straight(Global_S45.Out_Offset, Global_S45.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = false;
+				break;
+			case S45R_RE:
+				Ctrl_SideWall.Use = false;
+				Ctrl_FrontWall.Use = false;
+		    	Move_Straight(Global_RE_S45.In_Offset, Global_RE_S45.Speed, Global_Straight.Speed.Acc);
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_RE_S45, R_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_RE_S45.Out_Offset, Global_RE_S45.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = true;
+				break;
+			case S45L_RE:
+				Ctrl_SideWall.Use = false;
+				Ctrl_FrontWall.Use = false;
+		    	Move_Straight(Global_RE_S45.In_Offset, Global_RE_S45.Speed, Global_Straight.Speed.Acc);
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_RE_S45, L_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_RE_S45.Out_Offset, Global_RE_S45.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = true;
+				break;
+			case S135R:
+				Ctrl_SideWall.Use = true;
+				Ctrl_FrontWall.Use = false;
+				Global_WSen.SideEnd.Use = 2;
+		    	Move_Straight(Global_S135.In_Offset, Global_S135.Speed, Global_Straight.Speed.Acc);
+				Global_WSen.SideEnd.Use = 0;
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_S135, R_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = false;
+				Move_Straight(Global_S135.Out_Offset, Global_S135.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = false;
+				break;
+			case S135L:
+				Ctrl_SideWall.Use = true;
+				Ctrl_FrontWall.Use = false;
+				Global_WSen.SideEnd.Use = 2;
+		    	Move_Straight(Global_S135.In_Offset, Global_S135.Speed, Global_Straight.Speed.Acc);
+		    	Global_WSen.SideEnd.Use = 0;
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_S135, L_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = false;
+				Move_Straight(Global_S135.Out_Offset, Global_S135.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = false;
+				break;
+			case S135R_RE:
+				Ctrl_SideWall.Use = false;
+				Ctrl_FrontWall.Use = false;
+		    	Move_Straight(Global_RE_S135.In_Offset, Global_RE_S135.Speed, Global_Straight.Speed.Acc);
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_RE_S135, R_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_RE_S135.Out_Offset, Global_RE_S135.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = true;
+				break;
+			case S135L_RE:
+				Ctrl_SideWall.Use = false;
+				Ctrl_FrontWall.Use = false;
+		    	Move_Straight(Global_RE_S135.In_Offset, Global_RE_S135.Speed, Global_Straight.Speed.Acc);
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_RE_S135, L_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_RE_S135.Out_Offset, Global_RE_S135.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = true;
+				break;
+			case S180R:
+				Ctrl_SideWall.Use = true;
+				Ctrl_FrontWall.Use = false;
+				Global_WSen.SideEnd.Use = 2;
+		    	Move_Straight(Global_S180.In_Offset, Global_S180.Speed, Global_Straight.Speed.Acc);
+		    	Global_WSen.SideEnd.Use = 0;
+		    	Move_Slalom_Turn2( &Global_S180, R_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_S180.Out_Offset, Global_S180.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = true;
+				break;
+			case S180L:
+				Ctrl_SideWall.Use = true;
+				Ctrl_FrontWall.Use = false;
+				Global_WSen.SideEnd.Use = 2;
+		    	Move_Straight(Global_S180.In_Offset, Global_S180.Speed, Global_Straight.Speed.Acc);
+		    	Global_WSen.SideEnd.Use = 0;
+		    	Move_Slalom_Turn2( &Global_S180, L_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_S180.Out_Offset, Global_S180.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = true;
+				break;
+			case V90R:
+				Ctrl_SideWall.Use = false;
+				Ctrl_FrontWall.Use = false;
+		    	Move_Straight(Global_V90.In_Offset, Global_V90.Speed, Global_Straight.Speed.Acc);
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_V90, R_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = false;
+				Move_Straight(Global_V90.Out_Offset, Global_V90.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = false;
+				break;
+			case V90L:
+				Ctrl_SideWall.Use = false;
+				Ctrl_FrontWall.Use = false;
+		    	Move_Straight(Global_V90.In_Offset, Global_V90.Speed, Global_Straight.Speed.Acc);
+		    	Ctrl_FrontWall.Use = false;
+		    	Move_Slalom_Turn2( &Global_V90, L_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = false;
+				Move_Straight(Global_V90.Out_Offset, Global_V90.Speed, Global_Straight.Speed.Acc);
+				readWall_flg = 0;
+				re_flg = false;
+				break;
+
+			case W90R:
+				Ctrl_SideWall.Use = true;
+				Ctrl_FrontWall.Use = false;
+				Global_WSen.SideEnd.Use = 2;
+		    	Move_Straight(Global_W90.In_Offset, Global_W90.Speed, Global_Straight.Speed.Acc);
+		    	Global_WSen.SideEnd.Use = 0;
+		    	Log_Start();
+		    	Move_Slalom_Turn2( &Global_W90, R_TURN );
+		    	Log_Stop();
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_W90.Out_Offset, Global_W90.Speed, Global_Straight.Speed.Acc);
+
+				re_flg = true;
+				readWall_flg = 0;
+				break;
+
+			case W90L:
+				Ctrl_SideWall.Use = true;
+				Ctrl_FrontWall.Use = false;
+				Global_WSen.SideEnd.Use = 2;
+		    	Move_Straight(Global_W90.In_Offset, Global_W90.Speed, Global_Straight.Speed.Acc);
+		    	Global_WSen.SideEnd.Use = 0;
+		    	Move_Slalom_Turn2( &Global_W90, L_TURN );
+				//Move_Slalom_Turn2( &Global_S90L );
+				Ctrl_SideWall.Use = true;
+				Move_Straight(Global_W90.Out_Offset, Global_W90.Speed, Global_Straight.Speed.Acc);
+
+				re_flg = true;
+				readWall_flg = 0;
+				break;
+			case HALF_STR:
+				Ctrl_SideWall.Use = true;
+				Global_WSen.SideEnd.Use = 0;
+				switch( dia_course[map_count+1]){
+				case S45R:
+					decel_speed = Global_S45.Speed; readWall_flg = 2; break;
+				case S45L:
+					decel_speed = Global_S45.Speed; readWall_flg = 2; break;
+				case S135R:
+					decel_speed = Global_S135.Speed; readWall_flg = 2; break;
+				case S135L:
+					decel_speed = Global_S135.Speed; readWall_flg = 2; break;
+				case S180R:
+					decel_speed = Global_S180.Speed; readWall_flg = 2; break;
+				case S180L:
+					decel_speed = Global_S180.Speed; readWall_flg = 2; break;
+				case W90R:
+					decel_speed = Global_W90.Speed; readWall_flg = 2; break;
+				case W90L:
+					decel_speed = Global_W90.Speed; readWall_flg = 2; break;
+				default:
+					decel_speed = Global_Straight.Speed.Fast; readWall_flg = 1; break;
+				}
+				Move_Straight(Global_Straight.Dist.Half, decel_speed, Global_Straight.Speed.Acc);
+
+//				if(re_flg)
+//				//
+//				switch( dia_course[map_count+1]){
+//					case S45R:
+//						decel_speed = Global_S45.Speed; break;
+//					case S45L:
+//						decel_speed = Global_S45.Speed; break;
+//					case S135R:
+//						decel_speed = Global_S135.Speed; break;
+//					case S135L:
+//						decel_speed = Global_S135.Speed; break;
+//					case S180R:
+//						decel_speed = Global_S180.Speed; break;
+//					case S180L:
+//						decel_speed = Global_S180.Speed; break;
+//					default:
+//						decel_speed = Global_Straight.Speed.Normal; break;
+//					}
+//					Move_Straight(Global_Straight.Dist.Half, decel_speed, Global_Straight.Speed.Acc);
+//				//
+//				if( dia_course[map_count+1] == STR){
+//					Move_Straight(Global_Straight.Dist.Half, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
+//				}else if( dia_course[map_count+1] == HALF_STR){
+//					switch( dia_course[map_count+2]){
+//					case S45R:
+//						decel_speed = Global_S45.Speed; break;
+//					case S45L:
+//						decel_speed = Global_S45.Speed; break;
+//					case S135R:
+//						decel_speed = Global_S135.Speed; break;
+//					case S135L:
+//						decel_speed = Global_S135.Speed; break;
+//					case S180R:
+//						decel_speed = Global_S180.Speed; break;
+//					case S180L:
+//						decel_speed = Global_S180.Speed; break;
+//					default:
+//						decel_speed = Global_Straight.Speed.Normal; break;
+//					}
+//					Move_Straight(Global_Straight.Dist.Half, decel_speed, Global_Straight.Speed.Acc);
+//				}else{
+//					Move_Straight(Global_Straight.Dist.Half, decel_speed, Global_Straight.Speed.Acc);
+//				}
+//				if(re_flg == true ) readWall_flg = 1;
+//				else readWall_flg = 2;
+				break;
+		      // その他
+		      default :
+					Move_Stop();
+					return;                   			// ループ終了
+					break;
+	    }
+
+    										// 進行方向更新変数head_changeを用いて現在の進行方向headを更新
+		//head = ( head + head_change ) & 0x03; 				// 更新数値を加算して2進数下2桁でマスク
+		map_count++;
+	}
+
+	Move_Straight_Stop(Global_Straight.Dist.Half, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc);
 	Move_Stop();
 	MOT_Set_Dir( BRAKE, BRAKE );
+	Machine.Control = false;
 	Machine.State.Running = false;
 	Machine.State.FailSafe = false;
 }

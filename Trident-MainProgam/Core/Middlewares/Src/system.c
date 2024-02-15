@@ -211,7 +211,7 @@ void mode1( int x )
 	Buzzer_Set_Confirm();
 
 	while( 1 ){
-		int submode = Select_Number( 1, 13 );
+		int submode = Select_Number( 1, 14 );
 		if( submode == -1 ){
 			break;
 		}else{
@@ -281,7 +281,7 @@ void mode1( int x )
 
 					Log_Start();
 					Ctrl_SideWall.Use = true;
-					Move_Straight_Stop( Global_Straight.Dist.Full, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc );
+					Move_Straight_Stop( Global_Straight.Dist.Full*11, Global_Straight.Speed.Normal, Global_Straight.Speed.Acc );
 					Log_Stop();
 					MOT_Set_Dir( FREE, FREE );								// モータをフリー状態にする
 					LED_Switch_Wait();
@@ -480,15 +480,30 @@ void mode1( int x )
 					LED_Set_Confirm();
 
 					dia_course[0] = HALF_STR;
-					dia_course[1] = S45R;
+					dia_course[1] = S45L;
 					dia_course[2] = DSTR;
-					dia_course[3] = GOAL;
+					dia_course[3] = DSTR;
+					dia_course[4] = GOAL;
 					mouse_dia_try();
-
+					Log_Stop();
 					MOT_Set_Dir( FREE, FREE );								// モータをフリー状態にする
 					LED_Switch_Wait();
 					Log_Print();
 					break;
+
+				case 14:
+					Param_Load();
+					LED_Start_Wait();
+					IMU_Calibrate();
+					LED_Set_Confirm();
+
+					Log_Start();
+					Ctrl_SideWall.Use = true;
+					Log_Stop();
+
+					MOT_Set_Dir( FREE, FREE );								// モータをフリー状態にする
+					LED_Switch_Wait();
+					Log_Print();
 				default:
 					printf("\r\n----------------ERROR --------------\r\n No Such Mode\r\n");
 					break;
@@ -525,6 +540,10 @@ void mode2( int x )
 
 	LED_Set_Confirm();
 	Machine.State.FailSafe = false;
+	head = 0;
+	pos_x = 0;
+	pos_y = 0;
+
 	mouse_search( GOAL_X, GOAL_Y, rtr_flg );
 	LED_Cleaning_Wait();
 }

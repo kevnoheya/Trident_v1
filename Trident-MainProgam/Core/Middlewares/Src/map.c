@@ -100,13 +100,43 @@ void clear_map( void )
 	  map[ 15 ][ 0 ] = 0x66; // 南東既探索(4+2=6)＆南東壁あり(4+2=6)
 	  // 右上角（x=15，y=15）の上書き
 	  map[ 15 ][ 15 ] = 0x33;// 東北既探索(2+1=3)＆東北壁あり(2+1=3)
+//	int x, y;
+//	  // 全ての区間を壁なし＆未探索に初期化
+//	  for( y = 0 ; y < 16 ; y++ )
+//		  for( x = 0 ; x < 16 ; x++ )
+//			  map[ x ][ y ] = 0x00;
+//
+//	  // 西側の外壁（x=0，y=0～15）を上書き
+//	  for( y = 0 ; y < 16 ; y++ )
+//		  map[ 0 ][ y ] = 0x88;  // 西のみ既探索(8)＆西のみ壁あり(8)
+//	  // 南側の外壁（x=0～15，y=0）を上書き
+//	  for( x = 0 ; x < 16 ; x++ )
+//		  map[ x ][ 0 ] = 0x44;  // 南のみ既探索(4)＆南のみ壁あり(4)
+//	  // 東側の外壁（x=15，y=0～15）を上書き
+//	  for( y = 0 ; y < 16 ; y++ )
+//		  map[ 15 ][ y ] = 0x22; // 東のみ既探索(2)＆東のみ壁あり(2)
+//	  // 北側の外壁（x=0～15，y=15）を上書き
+//	  for( x = 0 ; x < 16 ; x++ )
+//		  map[ x ][ 15 ] = 0x11; // 北のみ既探索(1)＆北のみ壁あり(1)
+//
+//	  // スタート区間（x=0，y=0）の上書き
+//	  map[ 0 ][ 0 ] = 0xfe;  // 西南東北既探索(8+4+2+1=f)＆西南東壁あり(8+4+2=e)
+//	  // スタート区間1つ右（x=1，y=0）の上書き
+//	  map[ 1 ][ 0 ] = 0xcc;  // 西南既探索(8+4=c)＆西南壁あり(8+4=c)
+//
+//	  // 左上角（x=0，y=15）の上書き
+//	  map[ 0 ][ 15 ] = 0x99; // 西北既探索(8+1=9)＆西北壁あり(8+1=9)
+//	  // 右下角（x=15，y=0）の上書き
+//	  map[ 15 ][ 0 ] = 0x66; // 南東既探索(4+2=6)＆南東壁あり(4+2=6)
+//	  // 右上角（x=15，y=15）の上書き
+//	  map[ 15 ][ 15 ] = 0x33;// 東北既探索(2+1=3)＆東北壁あり(2+1=3)
 }
 //===============================================
 // map: Update map
 //===============================================
 void make_map_data( void )
 {
-	  unsigned char wall;
+	unsigned char wall;
 
 	  // 壁情報取得
 	  wall = get_wall_data();
@@ -140,6 +170,40 @@ void make_map_data( void )
 	  if(pos_x!=0) map[pos_x-1][pos_y]=(map[pos_x-1][pos_y]&0xdd)|0x20|((wall>>2)&0x02);
 	  // 現在区画の北壁情報を1つ上区画の南壁情報として上書きする処理
 	  if(pos_y!=15)map[pos_x][pos_y+1]=(map[pos_x][pos_y+1]&0xbb)|0x40|((wall<<2)&0x04);
+//	  unsigned char wall;
+//
+//	  // 壁情報取得
+//	  wall = get_wall_data();
+//	  // 方向合わせ処理のために上位4bitに下位4bitの壁情報をコピー
+//	  wall = ( wall & 0x0f ) | ( wall << 4 );
+//	  // マウスの進行方向にあわせて壁データを加工
+//	  if     ( head == 1 ) wall = wall >> 3; // 北が前の情報を東が前に加工
+//	  else if( head == 2 ) wall = wall >> 2; // 北が前の情報を南が前に加工
+//	  else if( head == 3 ) wall = wall >> 1; // 北が前の情報を西が前に加工
+//	  // 西南東北を探索済みにする
+//	  wall |= 0xf0;
+//	  // 壁情報をMAPデータに上書き
+//	  map[ pos_x ][ pos_y ] = wall;
+//
+//	  // 西南東北の隣区画のMAPデータを上書き
+//
+//	  // 現在区画の東壁情報を1つ右区画の西壁情報として上書きする処理
+//	  // ここだけ詳細に説明．残り3つ（下，左，上）はまとめて記述
+//	  if( pos_x != 15 ){  // 一番東側の区画の時以外
+//	    // 右区画の西側情報（探索記録＆壁情報）を消去
+//	    map[ pos_x + 1 ][ pos_y ] &= 0x77;
+//	    // 右区画の西側探索記録を既探索とする
+//	    map[ pos_x + 1 ][ pos_y ] |= 0x80;
+//	    // 現在区画の東側情報を西側情報に変換して右区画の西側壁情報に上書き
+//	    map[ pos_x + 1 ][ pos_y ] |= ( map[ pos_x ][ pos_y ] << 2 ) & 0x08;
+//	  }
+//
+//	  // 現在区画の南壁情報を1つ下区画の北壁情報として上書きする処理
+//	  if(pos_y!=0) map[pos_x][pos_y-1]=(map[pos_x][pos_y-1]&0xee)|0x10|((wall>>2)&0x01);
+//	  // 現在区画の西壁情報を1つ左区画の東壁情報として上書きする処理
+//	  if(pos_x!=0) map[pos_x-1][pos_y]=(map[pos_x-1][pos_y]&0xdd)|0x20|((wall>>2)&0x02);
+//	  // 現在区画の北壁情報を1つ上区画の南壁情報として上書きする処理
+//	  if(pos_y!=15)map[pos_x][pos_y+1]=(map[pos_x][pos_y+1]&0xbb)|0x40|((wall<<2)&0x04);
 //	unsigned char wall;
 //
 //	// 壁情報取得
@@ -185,140 +249,291 @@ void make_map_data( void )
 //===============================================
 void make_potential( int gx, int gy, int mode )
 {
-	 unsigned char check_num, flg;//, flg1=0;
-	  unsigned char x,y;
-	  int px,py;
+	unsigned char check_num, flg;
+  unsigned char x,y;
+  int px,py;
 
-	  // ポテンシャルMAP初期化(全て最大値255にする)
-	  for( py = 0 ; py < 16 ; py++ )
-	    for( px = 0 ; px < 16 ; px++ )
-	      //f(p_map[ px ][ py ] != 255)
-	        p_map[ px ][ py ] = 255;
+  for(py = 0 ; py < 16 ; py ++){
+      for(px = 0; px < 16 ; px ++){
+        p_map[px][py] = 255;
+      }
+  }
 
-//	  if(mode == T_MODE && flg1 == 0){
-//	    for(py = 0 ; py < 16 ; py ++){
-//	      for(px = 0; px < 16 ; px ++){
-//	        if((map[px][py]&0xf0)!=0xf0) p_map[px][py] = 255;
-//	        flg1 = 1;
+  // ゴール座標にポテンシャル0を書き込む
+  p_map[ gx ][ gy ] = 0;
+
+  check_num = 0;
+  do{
+    flg = 0;  // 変更フラグ初期化
+    for( y = 0 ; y < 16 ; y++ ){
+      for( x = 0 ; x < 16 ; x++ ){
+        if( p_map[ x ][ y ] == check_num ){  // 今回対象区画とするポテンシャル
+          if( mode == S_MODE ){
+        	  // 探索走行(Search Mode)
+              // 北側の壁がない場合：北側のポテンシャルを対象区画のポテンシャルより+1
+              if((( map[ x ][ y ] & 0x01 ) == 0 ) && ( y != 15 )){
+            	  if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
+            		  p_map[ x ][ y + 1 ] = check_num + 1;
+            		  flg = 1;  // 変更したのでフラグON
+            	  }
+              }
+
+              // 東側の壁も同様に処理
+              if((( map[ x ][ y ] & 0x02 ) == 0 ) && ( x != 15 ))
+            	  if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
+
+              // 南側の壁も同様に処理
+              if((( map[ x ][ y ] & 0x04 ) == 0 ) && ( y != 0 ))
+            	  if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
+
+              // 西側の壁も同様に処理
+              if((( map[ x ][ y ] & 0x08 ) == 0 ) && ( x != 0 ))
+            	  if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
+          }
+          else{
+
+             // 二次走行(Try Mode)
+             // 北側が壁なし＆既探索の場合(壁なしでも未探索はポテンシャル255のまま)
+              // 北側のポテンシャルを対象区画のポテンシャルより+1
+              if((( map[ x ][ y ] & 0x11 ) == 0x10 ) && ( y != 15 )){
+                if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
+                  p_map[ x ][ y + 1 ] = check_num + 1;
+                  flg = 1;  // 変更したのでフラグON
+                }
+              }
+              // 東側の壁も同様に処理
+              if((( map[ x ][ y ] & 0x22 ) == 0x20 ) && ( x != 15 ))
+                if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
+              // 南側の壁も同様に処理
+              if((( map[ x ][ y ] & 0x44 ) == 0x40 ) && ( y != 0 ))
+                if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
+              // 西側の壁も同様に処理
+              if((( map[ x ][ y ] & 0x88 ) == 0x80 ) && ( x != 0 ))
+                if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
+
+          }
+        }
+      }
+    }
+    check_num++;      // 次のループのために対象ポテンシャルを+1
+  }while( flg != 0 ); // 今回のループで変更箇所が無ければ作成完了
+//	unsigned char check_num, flg;//, flg1=0;
+//	  unsigned char x,y;
+//	  int px,py;
+//
+//	  // ポテンシャルMAP初期化(全て最大値255にする)
+//	  for( py = 0 ; py < 16 ; py++ )
+//	    for( px = 0 ; px < 16 ; px++ )
+//	      //f(p_map[ px ][ py ] != 255)
+//	        p_map[ px ][ py ] = 255;
+//
+////	  if(mode == T_MODE && flg1 == 0){
+////	    for(py = 0 ; py < 16 ; py ++){
+////	      for(px = 0; px < 16 ; px ++){
+////	        if((map[px][py]&0xf0)!=0xf0) p_map[px][py] = 255;
+////	        flg1 = 1;
+////	      }
+////	    }
+////	  }
+//
+//	  // ゴール座標にポテンシャル0を書き込む
+//	  p_map[ gx ][ gy ] = 0;
+//
+//	  check_num = 0;
+//	  do{
+//	    flg = 0;  // 変更フラグ初期化
+//	    for( y = 0 ; y < 16 ; y++ ){
+//	      for( x = 0 ; x < 16 ; x++ ){
+//	        if( p_map[ x ][ y ] == check_num ){  // 今回対象区画とするポテンシャル
+//	          if( mode == S_MODE ){
+//
+//	            // 探索走行(Search Mode)
+//	            // 北側の壁がない場合：北側のポテンシャルを対象区画のポテンシャルより+1
+//	            if((( map[ x ][ y ] & 0x01 ) == 0 ) && ( y != 15 )){
+//	              if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
+//	                p_map[ x ][ y + 1 ] = check_num + 1;
+//	                flg = 1;  // 変更したのでフラグON
+//	              }
+//
+//	            }
+//
+//	            // 東側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x02 ) == 0 ) && ( x != 15 ))
+//	              if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
+//
+//	            // 南側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x04 ) == 0 ) && ( y != 0 ))
+//	              if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
+//
+//	            // 西側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x08 ) == 0 ) && ( x != 0 ))
+//	              if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
+//
+//
+//	          }else{
+//
+//	           // 二次走行(Try Mode)
+//	           // 北側が壁なし＆既探索の場合(壁なしでも未探索はポテンシャル255のまま)
+//	            // 北側のポテンシャルを対象区画のポテンシャルより+1
+//	            if((( map[ x ][ y ] & 0x11 ) == 0x10 ) && ( y != 15 )){
+//	              if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
+//	                p_map[ x ][ y + 1 ] = check_num + 1;
+//	                flg = 1;  // 変更したのでフラグON
+//	              }
+//	            }
+//	            // 東側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x22 ) == 0x20 ) && ( x != 15 ))
+//	              if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
+//	            // 南側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x44 ) == 0x40 ) && ( y != 0 ))
+//	              if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
+//	            // 西側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x88 ) == 0x80 ) && ( x != 0 ))
+//	              if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
+//
+//
+//	              //if ((map[ x ][ y ] & 0xf0 ) != 0xf0) p_map[ x ][ y ] = 255;
+//
+//	          }
+//	        }
 //	      }
 //	    }
-//	  }
-
-	  // ゴール座標にポテンシャル0を書き込む
-	  p_map[ gx ][ gy ] = 0;
-
-	  check_num = 0;
-	  do{
-	    flg = 0;  // 変更フラグ初期化
-	    for( y = 0 ; y < 16 ; y++ ){
-	      for( x = 0 ; x < 16 ; x++ ){
-	        if( p_map[ x ][ y ] == check_num ){  // 今回対象区画とするポテンシャル
-	          if( mode == S_MODE ){
-
-	            // 探索走行(Search Mode)
-	            // 北側の壁がない場合：北側のポテンシャルを対象区画のポテンシャルより+1
-	            if((( map[ x ][ y ] & 0x01 ) == 0 ) && ( y != 15 )){
-	              if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
-	                p_map[ x ][ y + 1 ] = check_num + 1;
-	                flg = 1;  // 変更したのでフラグON
-	              }
-
-	            }
-
-	            // 東側の壁も同様に処理
-	            if((( map[ x ][ y ] & 0x02 ) == 0 ) && ( x != 15 ))
-	              if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
-
-	            // 南側の壁も同様に処理
-	            if((( map[ x ][ y ] & 0x04 ) == 0 ) && ( y != 0 ))
-	              if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
-
-	            // 西側の壁も同様に処理
-	            if((( map[ x ][ y ] & 0x08 ) == 0 ) && ( x != 0 ))
-	              if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
-
-
-	          }else{
-
-	           // 二次走行(Try Mode)
-	           // 北側が壁なし＆既探索の場合(壁なしでも未探索はポテンシャル255のまま)
-	            // 北側のポテンシャルを対象区画のポテンシャルより+1
-	            if((( map[ x ][ y ] & 0x11 ) == 0x10 ) && ( y != 15 )){
-	              if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
-	                p_map[ x ][ y + 1 ] = check_num + 1;
-	                flg = 1;  // 変更したのでフラグON
-	              }
-	            }
-	            // 東側の壁も同様に処理
-	            if((( map[ x ][ y ] & 0x22 ) == 0x20 ) && ( x != 15 ))
-	              if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
-	            // 南側の壁も同様に処理
-	            if((( map[ x ][ y ] & 0x44 ) == 0x40 ) && ( y != 0 ))
-	              if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
-	            // 西側の壁も同様に処理
-	            if((( map[ x ][ y ] & 0x88 ) == 0x80 ) && ( x != 0 ))
-	              if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
-
-
-	              //if ((map[ x ][ y ] & 0xf0 ) != 0xf0) p_map[ x ][ y ] = 255;
-
-	          }
-	        }
-	      }
-	    }
-	    check_num++;      // 次のループのために対象ポテンシャルを+1
-	  }while( flg != 0 ); // 今回のループで変更箇所が無ければ作成完了
-//  unsigned char check_num, flg;
-//  unsigned char x,y;
-//  int px,py;
+//	    check_num++;      // 次のループのために対象ポテンシャルを+1
+//	  }while( flg != 0 ); // 今回のループで変更箇所が無ければ作成完了
+//	 unsigned char check_num, flg;//, flg1=0;
+//	  unsigned char x,y;
+//	  int px,py;
 //
-//  // ポテンシャルMAP初期化(全て最大値255にする)
-//  for( py = 0 ; py < 16 ; py++ )
-//    for( px = 0 ; px < 16 ; px++ )
-//        p_map[ px ][ py ] = 255;
+//	  // ポテンシャルMAP初期化(全て最大値255にする)
+//	  for( py = 0 ; py < 16 ; py++ )
+//	    for( px = 0 ; px < 16 ; px++ )
+//	      //f(p_map[ px ][ py ] != 255)
+//	        p_map[ px ][ py ] = 255;
 //
-//  // ゴール座標にポテンシャル0を書き込む
-//  p_map[ gx ][ gy ] = 0;
+////	  if(mode == T_MODE && flg1 == 0){
+////	    for(py = 0 ; py < 16 ; py ++){
+////	      for(px = 0; px < 16 ; px ++){
+////	        if((map[px][py]&0xf0)!=0xf0) p_map[px][py] = 255;
+////	        flg1 = 1;
+////	      }
+////	    }
+////	  }
 //
-//  check_num = 0;
-//  do{
-//    flg = 0;  // 変更フラグ初期化
-//    for( y = 0 ; y < 16 ; y++ ){
-//      for( x = 0 ; x < 16 ; x++ ){
-//        if( p_map[ x ][ y ] == check_num ){  // 今回対象区画とするポテンシャル
+//	  // ゴール座標にポテンシャル0を書き込む
+//	  p_map[ gx ][ gy ] = 0;
 //
-//          // 探索走行(Search Mode)
-//          // 北側の壁がない場合：北側のポテンシャルを対象区画のポテンシャルより+1
-//          if((( map[ x ][ y ] & 0x01 ) == 0 ) && ( y != 15 )){
-//            if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
-//              p_map[ x ][ y + 1 ] = check_num + 1;
-//              flg = 1;  // 変更したのでフラグON
-//            }
-//          }
-//          // 東側の壁も同様に処理
-//          if((( map[ x ][ y ] & 0x02 ) == 0 ) && ( x != 15 ))
-//            if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
+//	  check_num = 0;
+//	  do{
+//	    flg = 0;  // 変更フラグ初期化
+//	    for( y = 0 ; y < 16 ; y++ ){
+//	      for( x = 0 ; x < 16 ; x++ ){
+//	        if( p_map[ x ][ y ] == check_num ){  // 今回対象区画とするポテンシャル
+//	          if( mode == S_MODE ){
 //
-//          // 南側の壁も同様に処理
-//          if((( map[ x ][ y ] & 0x04 ) == 0 ) && ( y != 0 ))
-//            if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
+//	            // 探索走行(Search Mode)
+//	            // 北側の壁がない場合：北側のポテンシャルを対象区画のポテンシャルより+1
+//	            if((( map[ x ][ y ] & 0x01 ) == 0 ) && ( y != 15 )){
+//	              if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
+//	                p_map[ x ][ y + 1 ] = check_num + 1;
+//	                flg = 1;  // 変更したのでフラグON
+//	              }
 //
-//          // 西側の壁も同様に処理
-//          if((( map[ x ][ y ] & 0x08 ) == 0 ) && ( x != 0 ))
-//            if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
-//        }
-//      }
-//    }
-//    check_num++;      // 次のループのために対象ポテンシャルを+1
-//  }while( flg != 0 ); // 今回のループで変更箇所が無ければ作成完了
+//	            }
+//
+//	            // 東側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x02 ) == 0 ) && ( x != 15 ))
+//	              if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
+//
+//	            // 南側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x04 ) == 0 ) && ( y != 0 ))
+//	              if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
+//
+//	            // 西側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x08 ) == 0 ) && ( x != 0 ))
+//	              if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
+//
+//
+//	          }else{
+//
+//	           // 二次走行(Try Mode)
+//	           // 北側が壁なし＆既探索の場合(壁なしでも未探索はポテンシャル255のまま)
+//	            // 北側のポテンシャルを対象区画のポテンシャルより+1
+//	            if((( map[ x ][ y ] & 0x11 ) == 0x10 ) && ( y != 15 )){
+//	              if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
+//	                p_map[ x ][ y + 1 ] = check_num + 1;
+//	                flg = 1;  // 変更したのでフラグON
+//	              }
+//	            }
+//	            // 東側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x22 ) == 0x20 ) && ( x != 15 ))
+//	              if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
+//	            // 南側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x44 ) == 0x40 ) && ( y != 0 ))
+//	              if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
+//	            // 西側の壁も同様に処理
+//	            if((( map[ x ][ y ] & 0x88 ) == 0x80 ) && ( x != 0 ))
+//	              if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
+//
+//
+//	              //if ((map[ x ][ y ] & 0xf0 ) != 0xf0) p_map[ x ][ y ] = 255;
+//
+//	          }
+//	        }
+//	      }
+//	    }
+//	    check_num++;      // 次のループのために対象ポテンシャルを+1
+//	  }while( flg != 0 ); // 今回のループで変更箇所が無ければ作成完了
+////  unsigned char check_num, flg;
+////  unsigned char x,y;
+////  int px,py;
+////
+////  // ポテンシャルMAP初期化(全て最大値255にする)
+////  for( py = 0 ; py < 16 ; py++ )
+////    for( px = 0 ; px < 16 ; px++ )
+////        p_map[ px ][ py ] = 255;
+////
+////  // ゴール座標にポテンシャル0を書き込む
+////  p_map[ gx ][ gy ] = 0;
+////
+////  check_num = 0;
+////  do{
+////    flg = 0;  // 変更フラグ初期化
+////    for( y = 0 ; y < 16 ; y++ ){
+////      for( x = 0 ; x < 16 ; x++ ){
+////        if( p_map[ x ][ y ] == check_num ){  // 今回対象区画とするポテンシャル
+////
+////          // 探索走行(Search Mode)
+////          // 北側の壁がない場合：北側のポテンシャルを対象区画のポテンシャルより+1
+////          if((( map[ x ][ y ] & 0x01 ) == 0 ) && ( y != 15 )){
+////            if( p_map[ x ][ y + 1 ] == 255 ){// まだポテンシャルを書いてなければ
+////              p_map[ x ][ y + 1 ] = check_num + 1;
+////              flg = 1;  // 変更したのでフラグON
+////            }
+////          }
+////          // 東側の壁も同様に処理
+////          if((( map[ x ][ y ] & 0x02 ) == 0 ) && ( x != 15 ))
+////            if(p_map[x+1][y]==255){p_map[x+1][y]=check_num+1;flg=1;}
+////
+////          // 南側の壁も同様に処理
+////          if((( map[ x ][ y ] & 0x04 ) == 0 ) && ( y != 0 ))
+////            if(p_map[x][y-1]==255){p_map[x][y-1]=check_num+1;flg=1;}
+////
+////          // 西側の壁も同様に処理
+////          if((( map[ x ][ y ] & 0x08 ) == 0 ) && ( x != 0 ))
+////            if(p_map[x-1][y]==255){p_map[x-1][y]=check_num+1;flg=1;}
+////        }
+////      }
+////    }
+////    check_num++;      // 次のループのために対象ポテンシャルを+1
+////  }while( flg != 0 ); // 今回のループで変更箇所が無ければ作成完了
 }
 
 //===============================================
 // map: Adachi
 //===============================================
-int search_adachi( void )
+int search_adachi( int mode )
 {
-	  unsigned char wall_data, motion;
+	unsigned char wall_data, motion;
 	  short val, min_val;
 
 	  // 現在区画の壁情報取得
@@ -347,7 +562,14 @@ int search_adachi( void )
 	    if( head == 0 )  val -= 1;
 	    // 3.未探索／既探索による優先度の計算
 	    // 未探索:-2(優先度を2上げる)，既探索:0
-	    if(( map[ pos_x ][ pos_y + 1 ] & 0xf0 ) != 0xf0 )  val -= 2;
+	    if(( map[ pos_x ][ pos_y + 1 ] & 0xf0 ) != 0xf0 ){
+	    	if( mode == T_MODE ){
+	    		val += 2;
+	    	}
+	    	else{
+	    		val -= 2;
+	    	}
+	    }
 	    // 最小値の更新
 	    if( val < min_val ){
 	      min_val = val;
@@ -359,7 +581,14 @@ int search_adachi( void )
 	  if(( wall_data & 0x02 ) == 0 ){     // 東方向に壁が無いとき
 	    val = p_map[ pos_x + 1 ][ pos_y ] * 4 + 4;
 	    if( head == 1 )  val -= 1;
-	    if(( map[ pos_x + 1 ][ pos_y ] & 0xf0 ) != 0xf0 )  val -= 2;
+	    if(( map[ pos_x + 1 ][ pos_y ] & 0xf0 ) != 0xf0 ){
+	    	if( mode == T_MODE ){
+	    		val += 2;
+	    	}
+	    	else{
+	    		val -= 2;
+	    	}
+	    }
 	    if( val < min_val ){
 	      min_val = val;
 	      motion = 1;  // 移動すべき方向を東に設定
@@ -370,7 +599,14 @@ int search_adachi( void )
 	  if(( wall_data & 0x04 ) == 0 ){     // 南方向に壁が無いとき
 	    val = p_map[ pos_x ][ pos_y - 1 ] * 4 + 4;
 	    if( head == 2 )  val -= 1;
-	    if(( map[ pos_x ][ pos_y - 1 ] & 0xf0 ) != 0xf0 )  val -= 2;
+	    if(( map[ pos_x ][ pos_y - 1 ] & 0xf0 ) != 0xf0 ){
+	    	if( mode == T_MODE ){
+	    		val += 2;
+	    	}
+	    	else{
+	    		val -= 2;
+	    	}
+	    }
 	    if( val < min_val ){
 	      min_val = val;
 	      motion = 2;  // 移動すべき方向を南に設定
@@ -381,7 +617,14 @@ int search_adachi( void )
 	  if(( wall_data & 0x08 ) == 0 ){     // 西方向に壁が無いとき
 	    val = p_map[ pos_x - 1 ][ pos_y ] * 4 + 4;
 	    if( head == 3 )  val -= 1;
-	    if(( map[ pos_x - 1 ][ pos_y ] & 0xf0 ) != 0xf0 )  val -= 2;
+	    if(( map[ pos_x - 1 ][ pos_y ] & 0xf0 ) != 0xf0 ){
+	    	if( mode == T_MODE ){
+	    		val += 2;
+	    	}
+	    	else{
+	    		val -= 2;
+	    	}
+	    }
 	    if( val < min_val ){
 	      min_val = val;
 	      motion = 3;  // 移動すべき方向を西に設定
@@ -392,6 +635,80 @@ int search_adachi( void )
 	  motion = ( motion - head ) & 0x03;
 
 	  return( motion );
+//	  unsigned char wall_data, motion;
+//	  short val, min_val;
+//
+//	  // 現在区画の壁情報取得
+//	  wall_data = map[ pos_x ][ pos_y ];
+//
+//	  // 計算される優先度の最大値を初期値に設定
+//	  min_val = 1025;  // 区画ポテンシャル最大値+1 255*4+4 +1 =1025
+//
+//	  // 周囲４つの方向に対して優先度を計算し，
+//	  // 一番優先度が高い（値が小さい）区画に移動する．
+//	  // 優先度はポテンシャル，未／既探索，直進方向の順．
+//	  // 例：ポテンシャルが0の場合＝基本優先度は0*4+4=4
+//	  // ※未探索なら-2，直進なら-1の減算方式
+//	  // 4:既探索＆直進以外
+//	  // 3:既探索＆直進
+//	  // 2:未探索＆直進以外
+//	  // 1:未探索＆直進
+//	  // 優先度が同じ結果の場合は北東南西の順に優先される
+//
+//	  // 北方向の優先度の計算
+//	  if(( wall_data & 0x01 ) == 0 ){     // 北方向に壁が無いとき
+//	    // 1.ポテンシャルを元に基本優先度を計算
+//	    val = p_map[ pos_x ][ pos_y + 1 ] * 4 + 4;
+//	    // 2.方向による優先度の計算
+//	    // 北方向が進行方向だった場合：-1(優先度を1上げる)
+//	    if( head == 0 )  val -= 1;
+//	    // 3.未探索／既探索による優先度の計算
+//	    // 未探索:-2(優先度を2上げる)，既探索:0
+//	    if(( map[ pos_x ][ pos_y + 1 ] & 0xf0 ) != 0xf0 )  val -= 2;
+//	    // 最小値の更新
+//	    if( val < min_val ){
+//	      min_val = val;
+//	      motion = 0;  // 移動すべき方向を北に設定
+//	    }
+//	  }
+//
+//	  // 東方向の優先度の計算
+//	  if(( wall_data & 0x02 ) == 0 ){     // 東方向に壁が無いとき
+//	    val = p_map[ pos_x + 1 ][ pos_y ] * 4 + 4;
+//	    if( head == 1 )  val -= 1;
+//	    if(( map[ pos_x + 1 ][ pos_y ] & 0xf0 ) != 0xf0 )  val -= 2;
+//	    if( val < min_val ){
+//	      min_val = val;
+//	      motion = 1;  // 移動すべき方向を東に設定
+//	    }
+//	  }
+//
+//	  // 南方向の優先度の計算
+//	  if(( wall_data & 0x04 ) == 0 ){     // 南方向に壁が無いとき
+//	    val = p_map[ pos_x ][ pos_y - 1 ] * 4 + 4;
+//	    if( head == 2 )  val -= 1;
+//	    if(( map[ pos_x ][ pos_y - 1 ] & 0xf0 ) != 0xf0 )  val -= 2;
+//	    if( val < min_val ){
+//	      min_val = val;
+//	      motion = 2;  // 移動すべき方向を南に設定
+//	    }
+//	  }
+//
+//	  // 西方向の優先度の計算
+//	  if(( wall_data & 0x08 ) == 0 ){     // 西方向に壁が無いとき
+//	    val = p_map[ pos_x - 1 ][ pos_y ] * 4 + 4;
+//	    if( head == 3 )  val -= 1;
+//	    if(( map[ pos_x - 1 ][ pos_y ] & 0xf0 ) != 0xf0 )  val -= 2;
+//	    if( val < min_val ){
+//	      min_val = val;
+//	      motion = 3;  // 移動すべき方向を西に設定
+//	    }
+//	  }
+//
+//	  // 移動すべき方向から行動を決定
+//	  motion = ( motion - head ) & 0x03;
+//
+//	  return( motion );
 }
 
 //===============================================
@@ -432,7 +749,7 @@ void make_course( int goal_x, int goal_y )
 		else if( head == 3 ) pos_x--;		// 西向き x-1
 
 		make_potential( goal_x, goal_y, T_MODE );				//ポテンシャルマップ更新
-		motion = search_adachi();					//探索アルゴリズムを足立法にセット
+		motion = search_adachi( T_MODE );					//探索アルゴリズムを足立法にセット
 
 		if( pos_x == goal_x && pos_y == goal_y )
 			motion = 4;
@@ -743,21 +1060,21 @@ void make_dia_course( void )
 		}
 		// ----------------------------
 		// W90L
-//		else if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
-//			t--; dia_course[t] = W90L; t++;
-//			dia_course[t] = HALF_STR;
-//			i+=2;
-//			dia_state = 0;
-//			RE_flg = 1;
-//		}
-//		// W90R
-//		else if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
-//			t--; dia_course[t] = W90R; t++;
-//			dia_course[t] = HALF_STR;
-//			i+=2;
-//			dia_state = 0;
-//			RE_flg = 1;
-//		}
+		else if((course[i-1] == STR && course[i] == S90L) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+			t--; dia_course[t] = W90L; t++;
+			dia_course[t] = HALF_STR;
+			i+=2;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		// W90R
+		else if((course[i-1] == STR && course[i] == S90R) && ( course[i+1] == STR && dia_state == 0 && RE_flg == 1) ){
+			t--; dia_course[t] = W90R; t++;
+			dia_course[t] = HALF_STR;
+			i+=2;
+			dia_state = 0;
+			RE_flg = 1;
+		}
 		// ----------------------------
 		//S135L
 		else if(((course[i-1] == STR && course[i] == S90L) && ((course[i+1] == S90L && course[i+2] == S90R)) && (dia_state == 0 && RE_flg == 1))){
@@ -806,24 +1123,24 @@ void make_dia_course( void )
 			RE_flg = 1;
 		}
 		// ----------------------------
-//		//W90L
-//		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == STR ) ){
-//			dia_course[t] = HALF_STR; t++;
-//			dia_course[t] = W90L; t++;
-//			dia_course[t] = HALF_STR;
-//			i+=3;
-//			dia_state = 0;
-//			RE_flg = 1;
-//		}
-//		//W90R
-//		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == STR ) ){
-//			dia_course[t] = HALF_STR; t++;
-//			dia_course[t] = W90R; t++;
-//			dia_course[t] = HALF_STR;
-//			i+=3;
-//			dia_state = 0;
-//			RE_flg = 1;
-//		}
+		//W90L
+		else if((course[i] == STR && course[i+1] == S90L) && ( course[i+2] == STR ) ){
+			dia_course[t] = HALF_STR; t++;
+			dia_course[t] = W90L; t++;
+			dia_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
+		//W90R
+		else if((course[i] == STR && course[i+1] == S90R) && ( course[i+2] == STR ) ){
+			dia_course[t] = HALF_STR; t++;
+			dia_course[t] = W90R; t++;
+			dia_course[t] = HALF_STR;
+			i+=3;
+			dia_state = 0;
+			RE_flg = 1;
+		}
 		// ----------------------------
 		//S135L
 		else if(((course[i] == STR && course[i+1] == S90L) && (course[i+2] == S90L && course[i+3] == S90R)) && dia_state == 0){
@@ -935,6 +1252,7 @@ void make_dia_course( void )
 	}
 
 	if( dia_course[t-1] == STR ) dia_course[t-1] = GOAL;
+	dia_course[t] = GOAL;
 
 }
 

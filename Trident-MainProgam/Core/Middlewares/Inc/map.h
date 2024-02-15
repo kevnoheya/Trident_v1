@@ -76,7 +76,7 @@ void read_wall_data( void );
 void clear_map( void );
 void make_map_data( void );
 void make_potential( int gx, int gy, int mode );
-int search_adachi( void );
+int search_adachi( int mode );
 void make_try_map( void );
 void make_course( int goal_x, int goal_y );
 void make_wideturn_course( void );

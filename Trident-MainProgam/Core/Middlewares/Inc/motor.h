@@ -24,7 +24,7 @@
 #define GEAR_PINION 	9.0f							// ピニオンの歯数
 #define GEAR_WHEEL		42.0f							// ホイールの歯数
 #define GEAR_RATIO		( GEAR_PINION / GEAR_WHEEL )	// ピニオンとホイールのギア比
-#define WHEEL_D			( 23.85 / 1000.0 )				// ホイールの直径[mm]
+#define WHEEL_D			( 24.65 / 1000.0 )				// ホイールの直径[mm]
 #define WHEEL_R			(　WHEEL_D / 2.0　)					// ホイールの半径[mm]
 #define ROBOT_THREAD 	64.0f 							// スレッド幅[mm]
 #define PULSE_TO_RPM 	( 60.0 * 1000.0 / 1024.0 )		// パルスからモータの回転数の変数係数[rpm]
